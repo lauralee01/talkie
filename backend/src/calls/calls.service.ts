@@ -1,16 +1,21 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { twiml } from 'twilio';
 
 @Injectable()
 export class CallsService {
+    constructor(private readonly configService: ConfigService) { }
 
     buildWelcomeResponse(): string {
         const response = new twiml.VoiceResponse();
 
+        const publicNgrokBaseUrl =
+            this.configService.getOrThrow<string>('PUBLIC_NGROK_BASE_URL');
+
         const gather = response.gather({
             input: ['dtmf'],
             numDigits: 1,
-            action: '/calls/menu',
+            action: `${publicNgrokBaseUrl}/calls/menu`,
             method: 'POST',
         });
 
