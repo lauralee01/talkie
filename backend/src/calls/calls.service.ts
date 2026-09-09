@@ -24,4 +24,22 @@ export class CallsService {
 
         return response.toString();
     }
+
+    buildMenuResponse(digits: string): string {
+        const response = new twiml.VoiceResponse();
+
+        if (digits === '1') {
+            response.say(
+                'You chose to leave a message. Talkie is working.',
+            );
+        } else {
+            response.say(
+                'Sorry, that option is not available.',
+            );
+        }
+
+        response.hangup();
+
+        return response.toString();
+    }
 }
