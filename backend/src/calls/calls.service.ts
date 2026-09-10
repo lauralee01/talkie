@@ -60,4 +60,26 @@ export class CallsService {
 
         return response.toString();
     }
+
+    buildRecordingCompleteResponse(
+        recordingUrl: string,
+        recordingSid: string,
+        recordingDuration: string,
+    ): string {
+        console.log('Talkie recording received:', {
+            recordingUrl,
+            recordingSid,
+            recordingDuration,
+        });
+
+        const response = new twiml.VoiceResponse();
+
+        response.say(
+            'Your Talkie has been saved. Goodbye.',
+        );
+
+        response.hangup();
+
+        return response.toString();
+    }
 }

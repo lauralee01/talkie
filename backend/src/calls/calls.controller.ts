@@ -17,4 +17,18 @@ export class CallsController {
         return this.callsService.buildMenuResponse(digits);
     }
 
+    @Post('recording-complete')
+    @Header('Content-Type', 'text/xml')
+    recordingComplete(
+        @Body('RecordingUrl') recordingUrl: string,
+        @Body('RecordingSid') recordingSid: string,
+        @Body('RecordingDuration') recordingDuration: string,
+    ): string {
+        return this.callsService.buildRecordingCompleteResponse(
+            recordingUrl,
+            recordingSid,
+            recordingDuration,
+        );
+    }
+
 }
