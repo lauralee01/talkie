@@ -34,7 +34,7 @@ export class CallsService {
         const response = new twiml.VoiceResponse();
 
         if (digits === '1') {
-            const publicBaseUrl =
+            const publicNgrokBaseUrl =
                 this.configService.getOrThrow<string>('PUBLIC_NGROK_BASE_URL');
 
             response.say(
@@ -42,7 +42,7 @@ export class CallsService {
             );
 
             response.record({
-                action: `${publicBaseUrl}/calls/recording-complete`,
+                action: `${publicNgrokBaseUrl}/calls/recording-complete`,
                 method: 'POST',
                 finishOnKey: '#',
                 maxLength: 60,
