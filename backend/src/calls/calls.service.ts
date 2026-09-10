@@ -34,14 +34,27 @@ export class CallsService {
         const response = new twiml.VoiceResponse();
 
         if (digits === '1') {
+            const publicBaseUrl =
+                this.configService.getOrThrow<string>('PUBLIC_NGROK_BASE_URL');
+
             response.say(
-                'You chose to leave a message. Talkie is working.',
+                'Leave your Talkie after the beep. Press pound when you are finished.',
             );
-        } else {
-            response.say(
-                'Sorry, that option is not available.',
-            );
+
+            response.record({
+                action: `${publicBaseUrl}/calls/recording-complete`,
+                method: 'POST',
+                finishOnKey: '#',
+                maxLength: 60,
+                playBeep: true,
+            });
+
+            return response.toString();
         }
+
+        response.say(
+            'Sorry, that option is not available.',
+        );
 
         response.hangup();
 
