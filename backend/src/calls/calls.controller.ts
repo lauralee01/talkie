@@ -31,4 +31,10 @@ export class CallsController {
         );
     }
 
+    @Post('bandwidth/incoming')
+    @Header('Content-Type', 'application/xml')
+    bandwidthIncomingCall(): string {
+        return this.callsService.buildBandwidthWelcomeResponse();
+    }
+
 }

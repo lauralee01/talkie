@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { twiml } from 'twilio';
+import { Bxml } from 'bandwidth-sdk';
 
 @Injectable()
 export class CallsService {
@@ -81,5 +82,15 @@ export class CallsService {
         response.hangup();
 
         return response.toString();
+    }
+
+    buildBandwidthWelcomeResponse(): string {
+        const speakSentence = new Bxml.SpeakSentence(
+            'Welcome to Talkie. Bandwidth is connected.',
+        );
+
+        const response = new Bxml.Response(speakSentence);
+
+        return response.toBxml();
     }
 }
