@@ -17,4 +17,19 @@ export class CallsController {
         return this.callsService.buildBandwidthMenuResponse(body.digits ?? '');
     }
 
+    @Post('bandwidth/recording-complete')
+    @Header('Content-Type', 'application/xml')
+    bandwidthRecordingComplete(
+        @Body() body: Record<string, unknown>,
+    ): string {
+        return this.callsService.buildBandwidthRecordingCompleteResponse(body);
+    }
+
+    @Post('bandwidth/recording-available')
+    bandwidthRecordingAvailable(
+        @Body() body: Record<string, unknown>,
+    ): void {
+        this.callsService.handleBandwidthRecordingAvailable(body);
+    }
+
 }

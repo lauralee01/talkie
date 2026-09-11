@@ -25,15 +25,53 @@ export class CallsService {
     }
 
     buildBandwidthMenuResponse(digits: string): string {
-        const message =
-            digits === '1'
-                ? 'You chose to leave a message. Talkie is working.'
-                : 'Sorry, that option is not available.';
+        if (digits !== '1') {
+            const speakSentence = new Bxml.SpeakSentence(
+                'Sorry, that option is not available.',
+            );
 
-        const speakSentence = new Bxml.SpeakSentence(message);
+            const response = new Bxml.Response(speakSentence);
+
+            return response.toBxml();
+        }
+
+        const speakSentence = new Bxml.SpeakSentence(
+            'Leave your Talkie after the beep. Press pound when you are finished.',
+        );
+
+        const record = new Bxml.Record({
+            recordCompleteUrl: '/calls/bandwidth/recording-complete',
+            recordingAvailableUrl: '/calls/bandwidth/recording-available',
+            terminatingDigits: '#',
+            maxDuration: 60,
+            fileFormat: 'wav',
+        });
+
+        const response = new Bxml.Response([
+            speakSentence,
+            record,
+        ]);
+
+        return response.toBxml();
+    }
+
+    buildBandwidthRecordingCompleteResponse(
+        event: Record<string, unknown>,
+    ): string {
+        console.log('Talkie recording complete:', event);
+
+        const speakSentence = new Bxml.SpeakSentence(
+            'Your Talkie has been saved. Goodbye.',
+        );
 
         const response = new Bxml.Response(speakSentence);
 
         return response.toBxml();
+    }
+
+    handleBandwidthRecordingAvailable(
+        event: Record<string, unknown>,
+    ): void {
+        console.log('Talkie recording available:', event);
     }
 }
