@@ -37,4 +37,10 @@ export class CallsController {
         return this.callsService.buildBandwidthWelcomeResponse();
     }
 
+    @Post('bandwidth/menu')
+    @Header('Content-Type', 'application/xml')
+    bandwidthMenu(@Body() body: { digits?: string }): string {
+        return this.callsService.buildBandwidthMenuResponse(body.digits ?? '');
+    }
+
 }
