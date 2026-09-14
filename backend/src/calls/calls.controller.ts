@@ -26,10 +26,12 @@ export class CallsController {
     }
 
     @Post('bandwidth/recording-available')
-    bandwidthRecordingAvailable(
+    async bandwidthRecordingAvailable(
         @Body() body: Record<string, unknown>,
-    ): void {
-        this.callsService.handleBandwidthRecordingAvailable(body);
+    ): Promise<void> {
+        await this.callsService.handleBandwidthRecordingAvailable(
+            body,
+        );
     }
 
 }
