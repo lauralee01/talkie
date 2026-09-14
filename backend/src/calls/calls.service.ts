@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Bxml, Configuration, RecordingsApi } from 'bandwidth-sdk';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
 
 @Injectable()
 export class CallsService {
@@ -89,9 +91,55 @@ export class CallsService {
         return response.toBxml();
     }
 
-    handleBandwidthRecordingAvailable(
+    async handleBandwidthRecordingAvailable(
         event: Record<string, unknown>,
-    ): void {
+    ): Promise<void> {
         console.log('Talkie recording available:', event);
+
+        const callId = event.callId;
+        const recordingId = event.recordingId;
+
+        if (
+            typeof callId !== 'string' ||
+            typeof recordingId !== 'string'
+        ) {
+            console.error(
+                'Recording callback is missing callId or recordingId.',
+            );
+
+            return;
+        }
+
+        const { data } =
+            await this.recordingsApi.downloadCallRecording(
+                this.bandwidthAccountId,
+                callId,
+                recordingId,
+            );
+
+        const recordingsDirectory = join(
+            process.cwd(),
+            'recordings',
+        );
+
+        await mkdir(recordingsDirectory, {
+            recursive: true,
+        });
+
+        const filePath = join(
+            recordingsDirectory,
+            `${recordingId}.wav`,
+        );
+
+        const arrayBuffer = await data.arrayBuffer();
+
+        const audioBuffer = Buffer.from(arrayBuffer);
+
+        await writeFile(filePath, audioBuffer);
+
+        console.log(
+            'Talkie recording downloaded:',
+            filePath,
+        );
     }
 }
