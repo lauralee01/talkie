@@ -110,36 +110,53 @@ export class CallsService {
             return;
         }
 
-        const { data } =
-            await this.recordingsApi.downloadCallRecording(
-                this.bandwidthAccountId,
-                callId,
-                recordingId,
+        try {
+            const { data } =
+                await this.recordingsApi.downloadCallRecording(
+                    this.bandwidthAccountId,
+                    callId,
+                    recordingId,
+                    {
+                        responseType: 'arraybuffer',
+                    },
+                );
+
+            const recordingsDirectory = join(
+                process.cwd(),
+                'recordings',
             );
 
-        const recordingsDirectory = join(
-            process.cwd(),
-            'recordings',
-        );
+            await mkdir(recordingsDirectory, {
+                recursive: true,
+            });
 
-        await mkdir(recordingsDirectory, {
-            recursive: true,
-        });
+            const filePath = join(
+                recordingsDirectory,
+                `${recordingId}.wav`,
+            );
 
-        const filePath = join(
-            recordingsDirectory,
-            `${recordingId}.wav`,
-        );
+            const audioBuffer = Buffer.from(
+                data as unknown as ArrayBuffer,
+            );
 
-        const arrayBuffer = await data.arrayBuffer();
+            await writeFile(filePath, audioBuffer);
 
-        const audioBuffer = Buffer.from(arrayBuffer);
-
-        await writeFile(filePath, audioBuffer);
-
-        console.log(
-            'Talkie recording downloaded:',
-            filePath,
-        );
+            console.log(
+                'Talkie recording downloaded:',
+                filePath,
+            );
+        } catch (error: unknown) {
+            console.error(
+                'Failed to download Talkie recording:',
+                {
+                    callId,
+                    recordingId,
+                    message:
+                        error instanceof Error
+                            ? error.message
+                            : 'Unknown error',
+                },
+            );
+        }
     }
 }
