@@ -1,10 +1,30 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Bxml } from 'bandwidth-sdk';
+import { Bxml, Configuration, RecordingsApi } from 'bandwidth-sdk';
 
 @Injectable()
 export class CallsService {
-    constructor(private readonly configService: ConfigService) { }
+    private readonly recordingsApi: RecordingsApi;
+    private readonly bandwidthAccountId: string;
+    constructor(
+        private readonly configService: ConfigService,
+    ) {
+        const clientId =
+            this.configService.getOrThrow<string>('BANDWIDTH_CLIENT_ID');
+
+        const clientSecret =
+            this.configService.getOrThrow<string>('BANDWIDTH_CLIENT_SECRET');
+
+        this.bandwidthAccountId =
+            this.configService.getOrThrow<string>('BANDWIDTH_ACCOUNT_ID');
+
+        const bandwidthConfig = new Configuration({
+            clientId,
+            clientSecret,
+        });
+
+        this.recordingsApi = new RecordingsApi(bandwidthConfig);
+    }
 
     buildBandwidthWelcomeResponse(): string {
         const speakSentence = new Bxml.SpeakSentence(
@@ -55,7 +75,6 @@ export class CallsService {
         return response.toBxml();
     }
 
-    // build Bandwidth recording complete response to bxml
     buildBandwidthRecordingCompleteResponse(
         event: Record<string, unknown>,
     ): string {
