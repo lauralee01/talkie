@@ -11,3 +11,16 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model Talkie {
+  id              String   @id @default(uuid())
+  callId          String // BW call ID
+  recordingId     String   @unique
+  fromNumber      String // caller's phone number
+  toNumber        String // called phone number
+  durationSeconds Float // duration of recording
+  fileFormat      String // e.g. "mp3", "wav", "m4a"
+  audioPath       String // where the file lives locally
+  status          String // "available", "error", etc.
+  createdAt       DateTime @default(now())
+}
