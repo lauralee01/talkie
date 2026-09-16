@@ -3,13 +3,16 @@ import { ConfigService } from '@nestjs/config';
 import { Bxml, Configuration, RecordingsApi } from 'bandwidth-sdk';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { TalkiesService } from '../talkies/talkies.service';
 
 @Injectable()
 export class CallsService {
     private readonly recordingsApi: RecordingsApi;
     private readonly bandwidthAccountId: string;
+
     constructor(
         private readonly configService: ConfigService,
+        private readonly talkiesService: TalkiesService,
     ) {
         const clientId =
             this.configService.getOrThrow<string>('BANDWIDTH_CLIENT_ID');
@@ -26,6 +29,20 @@ export class CallsService {
         });
 
         this.recordingsApi = new RecordingsApi(bandwidthConfig);
+    }
+
+    private parseDurationSeconds(duration: unknown): number {
+        if (typeof duration !== 'string') {
+            return 0;
+        }
+
+        const match = duration.match(/^PT([\d.]+)S$/);
+
+        if (!match) {
+            return 0;
+        }
+
+        return Number(match[1]);
     }
 
     buildBandwidthWelcomeResponse(): string {
@@ -98,17 +115,25 @@ export class CallsService {
 
         const callId = event.callId;
         const recordingId = event.recordingId;
+        const fromNumber = event.from;
+        const toNumber = event.to;
+        const duration = event.duration;
+        const fileFormat = event.fileFormat;
 
         if (
             typeof callId !== 'string' ||
-            typeof recordingId !== 'string'
+            typeof recordingId !== 'string' ||
+            typeof fromNumber !== 'string' ||
+            typeof toNumber !== 'string' ||
+            typeof fileFormat !== 'string'
         ) {
             console.error(
-                'Recording callback is missing callId or recordingId.',
+                'Bandwidth recording event is missing required fields',
             );
-
             return;
         }
+
+        const durationSeconds = this.parseDurationSeconds(duration);
 
         try {
             const { data } =
@@ -141,13 +166,27 @@ export class CallsService {
 
             await writeFile(filePath, audioBuffer);
 
+            await this.talkiesService.upsert({
+                callId,
+                recordingId,
+                fromNumber,
+                toNumber,
+                durationSeconds,
+                fileFormat,
+                audioPath: filePath,
+                status: 'ready',
+            });
+
             console.log(
-                'Talkie recording downloaded:',
-                filePath,
+                'Talkie recording downloaded and persisted:',
+                {
+                    recordingId,
+                    filePath,
+                },
             );
         } catch (error: unknown) {
             console.error(
-                'Failed to download Talkie recording:',
+                'Failed to process Talkie recording:',
                 {
                     callId,
                     recordingId,
