@@ -33,4 +33,12 @@ export class TalkiesService {
             create: input,
         });
     }
+
+    async findAll() {
+        return this.prisma.talkie.findMany({
+            orderBy: {
+                createdAt: 'desc',
+            },
+        });
+    }
 }
