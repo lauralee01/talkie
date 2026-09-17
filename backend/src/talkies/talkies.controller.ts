@@ -1,4 +1,12 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
+import { TalkiesService } from './talkies.service';
 
 @Controller('talkies')
-export class TalkiesController {}
+export class TalkiesController {
+    constructor(private readonly talkiesService: TalkiesService) { }
+
+    @Get()
+    async findAll() {
+        return this.talkiesService.findAll();
+    }
+}
