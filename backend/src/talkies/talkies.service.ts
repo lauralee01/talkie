@@ -41,4 +41,12 @@ export class TalkiesService {
             },
         });
     }
+
+    async findById(id: string) {
+        return this.prisma.talkie.findUnique({
+            where: {
+                id,
+            },
+        });
+    }
 }
