@@ -36,6 +36,15 @@ export class TalkiesService {
 
     async findAll() {
         return this.prisma.talkie.findMany({
+            select: {
+                id: true,
+                fromNumber: true,
+                toNumber: true,
+                durationSeconds: true,
+                fileFormat: true,
+                status: true,
+                createdAt: true,
+            },
             orderBy: {
                 createdAt: 'desc',
             },
