@@ -12,6 +12,7 @@ export type Talkie = {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
+// List all talkies
 export async function getTalkies(): Promise<Talkie[]> {
     const response = await fetch(`${API_URL}/talkies`);
 
