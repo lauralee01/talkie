@@ -19,8 +19,14 @@ export function TalkieCard({ talkie }: TalkieCardProps) {
                     </p>
                 </div>
 
-                <time className="text-sm text-zinc-500">
-                    {new Date(talkie.createdAt).toLocaleDateString()}
+                <time
+                    dateTime={talkie.createdAt}
+                    className="text-sm text-zinc-500"
+                >
+                    {new Intl.DateTimeFormat("en-US", {
+                        month: "short",
+                        day: "numeric",
+                    }).format(new Date(talkie.createdAt))}
                 </time>
             </div>
 
