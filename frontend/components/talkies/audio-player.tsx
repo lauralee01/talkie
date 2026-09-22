@@ -52,11 +52,13 @@ export function AudioPlayer({ talkieId }: AudioPlayerProps) {
         const minutes = Math.floor(seconds / 60);
         const remainingSeconds = Math.floor(seconds % 60);
 
-        return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+        return `${minutes}:${remainingSeconds
+            .toString()
+            .padStart(2, "0")}`;
     }
 
     return (
-        <div>
+        <div className="flex items-center gap-3">
             <audio
                 ref={audioRef}
                 src={audioUrl}
@@ -76,11 +78,18 @@ export function AudioPlayer({ talkieId }: AudioPlayerProps) {
                 type="button"
                 onClick={togglePlayback}
                 aria-label={isPlaying ? "Pause Talkie" : "Play Talkie"}
+                className="flex size-10 shrink-0 items-center justify-center rounded-full bg-zinc-950 text-white transition hover:bg-zinc-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950"
             >
-                {isPlaying ? "Pause" : "Play"}
+                {isPlaying ? (
+                    <PauseIcon />
+                ) : (
+                    <PlayIcon />
+                )}
             </button>
 
-            <span>{formatTime(currentTime)}</span>
+            <span className="w-9 text-right text-xs tabular-nums text-zinc-500">
+                {formatTime(currentTime)}
+            </span>
 
             <input
                 type="range"
@@ -90,9 +99,36 @@ export function AudioPlayer({ talkieId }: AudioPlayerProps) {
                 value={currentTime}
                 onChange={handleSeek}
                 aria-label="Talkie playback position"
+                className="min-w-0 flex-1 cursor-pointer accent-zinc-950"
             />
 
-            <span>{formatTime(duration)}</span>
+            <span className="w-9 text-xs tabular-nums text-zinc-500">
+                {formatTime(duration)}
+            </span>
         </div>
+    );
+}
+
+function PlayIcon() {
+    return (
+        <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            className="size-4 fill-current"
+        >
+            <path d="M8 5.5v13l10-6.5-10-6.5Z" />
+        </svg>
+    );
+}
+
+function PauseIcon() {
+    return (
+        <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            className="size-4 fill-current"
+        >
+            <path d="M7 5h3v14H7V5Zm7 0h3v14h-3V5Z" />
+        </svg>
     );
 }
