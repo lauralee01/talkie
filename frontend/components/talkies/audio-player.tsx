@@ -57,6 +57,15 @@ export function AudioPlayer({ talkieId }: AudioPlayerProps) {
             .padStart(2, "0")}`;
     }
 
+    const handleEnded = () => {
+        setIsPlaying(false);
+        setCurrentTime(0);
+
+        if (audioRef.current) {
+            audioRef.current.currentTime = 0;
+        }
+    };
+
     return (
         <div className="flex items-center gap-3">
             <audio
@@ -65,7 +74,7 @@ export function AudioPlayer({ talkieId }: AudioPlayerProps) {
                 preload="metadata"
                 onPlay={() => setIsPlaying(true)}
                 onPause={() => setIsPlaying(false)}
-                onEnded={() => setIsPlaying(false)}
+                onEnded={handleEnded}
                 onTimeUpdate={(event) => {
                     setCurrentTime(event.currentTarget.currentTime);
                 }}
