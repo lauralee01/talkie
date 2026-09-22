@@ -1,5 +1,6 @@
 import type { Talkie } from "@/lib/talkies-api";
 import { AudioPlayer } from "./audio-player";
+import { formatTalkieDate } from "@/lib/format-date";
 
 type TalkieCardProps = {
     talkie: Talkie;
@@ -23,10 +24,7 @@ export function TalkieCard({ talkie }: TalkieCardProps) {
                     dateTime={talkie.createdAt}
                     className="text-sm text-zinc-500"
                 >
-                    {new Intl.DateTimeFormat("en-US", {
-                        month: "short",
-                        day: "numeric",
-                    }).format(new Date(talkie.createdAt))}
+                    {formatTalkieDate(talkie.createdAt)}
                 </time>
             </div>
 
