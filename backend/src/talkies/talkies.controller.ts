@@ -1,16 +1,20 @@
 import {
     Controller,
     Get,
+    MessageEvent,
     NotFoundException,
     Param,
+    Sse,
     StreamableFile,
 } from '@nestjs/common';
 import { createReadStream, existsSync } from 'node:fs';
+import { Observable, map } from 'rxjs';
+import { TalkiesEventsService } from './talkies-events/talkies-events.service';
 import { TalkiesService } from './talkies.service';
 
 @Controller('talkies')
 export class TalkiesController {
-    constructor(private readonly talkiesService: TalkiesService) { }
+    constructor(private readonly talkiesService: TalkiesService, private readonly talkiesEventsService: TalkiesEventsService) { }
 
     @Get()
     async findAll() {
@@ -36,5 +40,16 @@ export class TalkiesController {
         return new StreamableFile(audioStream, {
             type: 'audio/wav',
         });
+    }
+
+    @Sse('events')
+    events(): Observable<MessageEvent> {
+        return this.talkiesEventsService.newTalkie$.pipe(
+            map(() => ({
+                data: {
+                    type: 'talkie.created',
+                },
+            })),
+        );
     }
 }
