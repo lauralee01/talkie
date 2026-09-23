@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { TalkiesEventsService } from './talkies-events/talkies-events.service';
 
 type CreateTalkieInput = {
     callId: string;
@@ -14,24 +15,24 @@ type CreateTalkieInput = {
 
 @Injectable()
 export class TalkiesService {
-    constructor(private readonly prisma: PrismaService) { }
+    constructor(private readonly prisma: PrismaService, private readonly talkiesEventsService: TalkiesEventsService) { }
 
     async upsert(input: CreateTalkieInput) {
-        return this.prisma.talkie.upsert({
+        const talkie = await this.prisma.talkie.upsert({
             where: {
                 recordingId: input.recordingId,
             },
             update: {
-                callId: input.callId,
-                fromNumber: input.fromNumber,
-                toNumber: input.toNumber,
-                durationSeconds: input.durationSeconds,
-                fileFormat: input.fileFormat,
-                audioPath: input.audioPath,
-                status: input.status,
+                ...input,
             },
-            create: input,
+            create: {
+                ...input,
+            },
         });
+
+        this.talkiesEventsService.notifyNewTalkie();
+
+        return talkie;
     }
 
     async findAll() {
