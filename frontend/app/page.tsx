@@ -33,7 +33,7 @@ export default async function Home() {
             </span>
           </div>
 
-          <TalkieList talkies={talkies} />
+          <TalkieList initialTalkies={talkies} />
         </section>
       </div>
     </main>
