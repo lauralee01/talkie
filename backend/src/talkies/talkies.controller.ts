@@ -42,14 +42,30 @@ export class TalkiesController {
         });
     }
 
+    // @Sse('events')
+    // events(): Observable<MessageEvent> {
+    //     return this.talkiesEventsService.newTalkie$.pipe(
+    //         map(() => ({
+    //             data: {
+    //                 type: 'talkie.created',
+    //             },
+    //         })),
+    //     );
+    // }
     @Sse('events')
     events(): Observable<MessageEvent> {
+        console.log('SSE client connected');
+
         return this.talkiesEventsService.newTalkie$.pipe(
-            map(() => ({
-                data: {
-                    type: 'talkie.created',
-                },
-            })),
+            map(() => {
+                console.log('Sending talkie.created SSE event');
+
+                return {
+                    data: {
+                        type: 'talkie.created',
+                    },
+                };
+            }),
         );
     }
 }
