@@ -3,7 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { Bxml, Configuration, RecordingsApi } from 'bandwidth-sdk';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { TalkiesEventsService } from '../talkies/talkies-events/talkies-events.service';
 import { TalkiesService } from '../talkies/talkies.service';
+
 
 @Injectable()
 export class CallsService {
@@ -13,6 +15,7 @@ export class CallsService {
     constructor(
         private readonly configService: ConfigService,
         private readonly talkiesService: TalkiesService,
+        private readonly talkiesEventsService: TalkiesEventsService,
     ) {
         const clientId =
             this.configService.getOrThrow<string>('BANDWIDTH_CLIENT_ID');
@@ -176,6 +179,8 @@ export class CallsService {
                 audioPath: filePath,
                 status: 'ready',
             });
+
+            this.talkiesEventsService.notifyNewTalkie();
 
             console.log(
                 'Talkie recording downloaded and persisted:',

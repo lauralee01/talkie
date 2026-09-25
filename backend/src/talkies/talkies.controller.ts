@@ -42,16 +42,6 @@ export class TalkiesController {
         });
     }
 
-    // @Sse('events')
-    // events(): Observable<MessageEvent> {
-    //     return this.talkiesEventsService.newTalkie$.pipe(
-    //         map(() => ({
-    //             data: {
-    //                 type: 'talkie.created',
-    //             },
-    //         })),
-    //     );
-    // }
     @Sse('events')
     events(): Observable<MessageEvent> {
         console.log('SSE client connected');
