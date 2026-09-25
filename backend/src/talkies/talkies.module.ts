@@ -7,7 +7,7 @@ import { TalkiesEventsService } from './talkies-events/talkies-events.service';
 @Module({
   imports: [PrismaModule],
   providers: [TalkiesService, TalkiesEventsService],
-  exports: [TalkiesService],
+  exports: [TalkiesService, TalkiesEventsService],
   controllers: [TalkiesController],
 })
 export class TalkiesModule { }

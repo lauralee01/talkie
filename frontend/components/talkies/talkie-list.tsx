@@ -41,22 +41,34 @@ export function TalkieList({
         };
     }, []);
 
-    if (talkies.length === 0) {
-        return (
-            <p>
-                No Talkies yet. Call your Talkie number to leave your first message.
-            </p>
-        );
-    }
-
     return (
-        <div className="flex flex-col gap-4">
-            {talkies.map((talkie) => (
-                <TalkieCard
-                    key={talkie.id}
-                    talkie={talkie}
-                />
-            ))}
-        </div>
+        <>
+            <div className="mb-8 flex items-center justify-between">
+                <h2 className="text-xl font-semibold">
+                    Recent
+                </h2>
+
+                <p className="text-sm text-zinc-500">
+                    {talkies.length}{" "}
+                    {talkies.length === 1 ? "Talkie" : "Talkies"}
+                </p>
+            </div>
+
+            {talkies.length === 0 ? (
+                <p className="text-zinc-500">
+                    No Talkies yet. Call your Talkie number to leave your
+                    first message.
+                </p>
+            ) : (
+                <div className="flex flex-col gap-4">
+                    {talkies.map((talkie) => (
+                        <TalkieCard
+                            key={talkie.id}
+                            talkie={talkie}
+                        />
+                    ))}
+                </div>
+            )}
+        </>
     );
 }

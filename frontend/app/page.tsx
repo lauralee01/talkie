@@ -24,17 +24,6 @@ export default async function Home() {
         </header>
 
         <section>
-          <div className="mb-5 flex items-center justify-between">
-            <h2 className="text-lg font-semibold">
-              Recent
-            </h2>
-
-            <span className="text-sm text-zinc-500">
-              {talkies.length}{" "}
-              {talkies.length === 1 ? "Talkie" : "Talkies"}
-            </span>
-          </div>
-
           <TalkieList initialTalkies={talkies} />
         </section>
       </div>
