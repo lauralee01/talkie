@@ -27,8 +27,6 @@ export default async function Home() {
           <TalkieList initialTalkies={talkies} />
         </section>
       </div>
-
-
     </main>
   );
 }
