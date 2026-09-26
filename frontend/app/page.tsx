@@ -4,8 +4,6 @@ import { getTalkies } from "@/lib/talkies-api";
 export default async function Home() {
   const talkies = await getTalkies();
 
-
-
   return (
     <main className="min-h-screen bg-zinc-50 text-zinc-950">
       <div className="mx-auto w-full max-w-3xl px-6 py-10 sm:px-8 sm:py-14">
