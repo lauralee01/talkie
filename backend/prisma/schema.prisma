@@ -22,5 +22,17 @@ model Talkie {
   fileFormat      String // e.g. "mp3", "wav", "m4a"
   audioPath       String // where the file lives locally
   status          String // "available", "error", etc.
-  createdAt       DateTime @default(now())
+  contactId       String?
+  contact         Contact? @relation(fields: [contactId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model Contact {
+  id          String   @id @default(uuid())
+  name        String
+  phoneNumber String   @unique
+  createdAt   DateTime @default(now())
+
+  talkies Talkie[]
 }
