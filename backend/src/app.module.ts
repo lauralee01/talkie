@@ -5,6 +5,7 @@ import { CallsModule } from './calls/calls.module';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
 import { TalkiesModule } from './talkies/talkies.module';
+import { ContactsModule } from './contacts/contacts.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { TalkiesModule } from './talkies/talkies.module';
     CallsModule,
     PrismaModule,
     TalkiesModule,
+    ContactsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
