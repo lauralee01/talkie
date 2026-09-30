@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ContactsService } from './contacts.service';
 
 type CreateContactBody = {
@@ -20,5 +20,10 @@ export class ContactsController {
             name: body.name,
             phoneNumber: body.phoneNumber,
         });
+    }
+
+    @Get()
+    async findAll() {
+        return this.contactsService.findAll();
     }
 }
