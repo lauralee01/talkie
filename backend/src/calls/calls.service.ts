@@ -5,6 +5,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { TalkiesEventsService } from '../talkies/talkies-events/talkies-events.service';
 import { TalkiesService } from '../talkies/talkies.service';
+import { ContactsService } from 'src/contacts/contacts.service';
 
 
 @Injectable()
@@ -16,6 +17,7 @@ export class CallsService {
         private readonly configService: ConfigService,
         private readonly talkiesService: TalkiesService,
         private readonly talkiesEventsService: TalkiesEventsService,
+        private readonly contactsService: ContactsService,
     ) {
         const clientId =
             this.configService.getOrThrow<string>('BANDWIDTH_CLIENT_ID');
@@ -137,6 +139,8 @@ export class CallsService {
         }
 
         const durationSeconds = this.parseDurationSeconds(duration);
+        const contact =
+            await this.contactsService.findByPhoneNumber(fromNumber);
 
         try {
             const { data } =

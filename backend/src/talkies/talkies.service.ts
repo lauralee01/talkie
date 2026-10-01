@@ -11,6 +11,7 @@ type CreateTalkieInput = {
     fileFormat: string;
     audioPath: string;
     status: string;
+    contactId?: string;
 };
 
 @Injectable()
