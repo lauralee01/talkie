@@ -46,6 +46,12 @@ export class TalkiesService {
                 fileFormat: true,
                 status: true,
                 createdAt: true,
+                contact: {
+                    select: {
+                        id: true,
+                        name: true,
+                    },
+                },
             },
             orderBy: {
                 createdAt: 'desc',
