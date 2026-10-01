@@ -182,9 +182,8 @@ export class CallsService {
                 fileFormat,
                 audioPath: filePath,
                 status: 'ready',
+                contactId: contact?.id,
             });
-
-            this.talkiesEventsService.notifyNewTalkie();
 
             console.log(
                 'Talkie recording downloaded and persisted:',
