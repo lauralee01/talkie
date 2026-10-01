@@ -16,7 +16,7 @@ export function TalkieCard({ talkie }: TalkieCardProps) {
                     </p>
 
                     <p className="mt-1 font-medium text-zinc-950">
-                        {talkie.fromNumber}
+                        {talkie.contact?.name ?? talkie.fromNumber}
                     </p>
                 </div>
 
