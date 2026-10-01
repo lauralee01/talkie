@@ -8,6 +8,10 @@ export type Talkie = {
     fileFormat: string;
     status: string;
     createdAt: string;
+    contact: {
+        id: string;
+        name: string;
+    } | null;
 };
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
