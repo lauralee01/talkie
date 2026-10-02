@@ -35,6 +35,21 @@ export class ContactsService {
         });
     }
 
+    async backfillTalkiesForContact(
+        contactId: string,
+        phoneNumber: string,
+    ) {
+        return this.prisma.talkie.updateMany({
+            where: {
+                fromNumber: phoneNumber,
+                contactId: null,
+            },
+            data: {
+                contactId,
+            },
+        });
+    }
+
     async findAll() {
         return this.prisma.contact.findMany({
             orderBy: {
