@@ -13,11 +13,25 @@ export class ContactsService {
     ) { }
 
     async create(input: CreateContactInput) {
-        return this.prisma.contact.create({
-            data: {
-                name: input.name,
-                phoneNumber: input.phoneNumber,
-            },
+        return this.prisma.$transaction(async (prisma) => {
+            const contact = await prisma.contact.create({
+                data: {
+                    name: input.name,
+                    phoneNumber: input.phoneNumber,
+                },
+            });
+
+            await prisma.talkie.updateMany({
+                where: {
+                    fromNumber: input.phoneNumber,
+                    contactId: null,
+                },
+                data: {
+                    contactId: contact.id,
+                },
+            });
+
+            return contact;
         });
     }
 
