@@ -1,3 +1,4 @@
+import { AddContactForm } from "@/components/contacts/add-contact-form";
 import { getContacts } from "@/lib/contacts-api";
 
 export default async function ContactsPage() {
@@ -19,6 +20,9 @@ export default async function ContactsPage() {
                 </p>
             </div>
 
+            <div className="mb-10">
+                <AddContactForm />
+            </div>
             <section>
                 <div className="mb-6 flex items-center justify-between">
                     <h2 className="text-xl font-semibold text-zinc-950">
