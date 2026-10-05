@@ -1,11 +1,7 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ContactsService } from './contacts.service';
+import { CreateContactDto } from './dto/create-contact.dto';
 
-
-type CreateContactBody = {
-    name: string;
-    phoneNumber: string;
-};
 
 @Controller('contacts')
 export class ContactsController {
@@ -15,7 +11,7 @@ export class ContactsController {
 
     @Post()
     async create(
-        @Body() body: CreateContactBody,
+        @Body() body: CreateContactDto,
     ) {
         return this.contactsService.create({
             name: body.name,
