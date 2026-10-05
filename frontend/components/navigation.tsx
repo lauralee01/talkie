@@ -15,7 +15,7 @@ export function Navigation() {
                 href="/"
                 className={
                     isTalkiesActive
-                        ? "font-medium text-zinc-950"
+                        ? "font-medium text-zinc-100"
                         : "text-zinc-500 transition hover:text-zinc-950"
                 }
             >
@@ -26,7 +26,7 @@ export function Navigation() {
                 href="/contacts"
                 className={
                     isContactsActive
-                        ? "font-medium text-zinc-950"
+                        ? "font-medium text-zinc-100"
                         : "text-zinc-500 transition hover:text-zinc-950"
                 }
             >
