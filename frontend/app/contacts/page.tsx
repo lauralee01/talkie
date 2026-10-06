@@ -1,4 +1,4 @@
-import { AddContactForm } from "@/components/contacts/add-contact-form";
+import { AddContact } from "@/components/contacts/add-contact";
 import { getContacts } from "@/lib/contacts-api";
 
 export default async function ContactsPage() {
@@ -7,9 +7,6 @@ export default async function ContactsPage() {
     return (
         <main className="mx-auto min-h-screen max-w-5xl px-6 py-8 sm:px-8">
             <div className="mb-12">
-                <p className="text-sm text-zinc-500">
-                    Talkie
-                </p>
 
                 <h1 className="mt-3 text-4xl font-bold tracking-tight text-zinc-950 sm:text-5xl">
                     Contacts
@@ -21,7 +18,7 @@ export default async function ContactsPage() {
             </div>
 
             <div className="mb-10">
-                <AddContactForm />
+                <AddContact />
             </div>
             <section>
                 <div className="mb-6 flex items-center justify-between">

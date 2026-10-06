@@ -8,9 +8,6 @@ export default async function Home() {
     <main className="min-h-screen bg-zinc-50 text-zinc-950">
       <div className="mx-auto w-full max-w-3xl px-6 py-10 sm:px-8 sm:py-14">
         <header className="mb-12">
-          <p className="mb-3 text-sm font-medium text-zinc-500">
-            Talkie
-          </p>
 
           <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
             Your Talkies
