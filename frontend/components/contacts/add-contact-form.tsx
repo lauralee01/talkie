@@ -4,7 +4,11 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createContact } from "@/lib/contacts-api";
 
-export function AddContactForm() {
+type AddContactFormProps = {
+    onSuccess: () => void;
+};
+
+export function AddContactForm({ onSuccess }: AddContactFormProps) {
     const router = useRouter();
 
     const [name, setName] = useState("");
@@ -27,6 +31,7 @@ export function AddContactForm() {
             setName("");
             setPhoneNumber("");
 
+            onSuccess();
             router.refresh();
         } catch {
             setError("We couldn't add this contact. Please try again.");

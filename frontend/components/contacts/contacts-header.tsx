@@ -34,7 +34,7 @@ export function ContactsHeader() {
 
             {isAddingContact && (
                 <div className="mt-8">
-                    <AddContactForm />
+                    <AddContactForm onSuccess={() => setIsAddingContact(false)} />
                 </div>
             )}
         </div>
