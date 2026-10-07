@@ -1,4 +1,4 @@
-import { AddContact } from "@/components/contacts/add-contact";
+import { ContactsHeader } from "@/components/contacts/contacts-header";
 import { getContacts } from "@/lib/contacts-api";
 
 export default async function ContactsPage() {
@@ -6,20 +6,8 @@ export default async function ContactsPage() {
 
     return (
         <main className="mx-auto min-h-screen max-w-5xl px-6 py-8 sm:px-8">
-            <div className="mb-12">
+            <ContactsHeader />
 
-                <h1 className="mt-3 text-4xl font-bold tracking-tight text-zinc-950 sm:text-5xl">
-                    Contacts
-                </h1>
-
-                <p className="mt-4 text-zinc-600">
-                    The people on your private line.
-                </p>
-            </div>
-
-            <div className="mb-10">
-                <AddContact />
-            </div>
             <section>
                 <div className="mb-6 flex items-center justify-between">
                     <h2 className="text-xl font-semibold text-zinc-950">
@@ -27,7 +15,8 @@ export default async function ContactsPage() {
                     </h2>
 
                     <p className="text-sm text-zinc-500">
-                        {contacts.length} {contacts.length === 1 ? "contact" : "contacts"}
+                        {contacts.length}{" "}
+                        {contacts.length === 1 ? "contact" : "contacts"}
                     </p>
                 </div>
 
