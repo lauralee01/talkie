@@ -3,9 +3,10 @@ import { ConfigService } from '@nestjs/config';
 import { Bxml, Configuration, RecordingsApi } from 'bandwidth-sdk';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { normalizePhoneNumber } from '../common/utils/phone-number';
+import { ContactsService } from '../contacts/contacts.service';
 import { TalkiesEventsService } from '../talkies/talkies-events/talkies-events.service';
 import { TalkiesService } from '../talkies/talkies.service';
-import { ContactsService } from 'src/contacts/contacts.service';
 
 
 @Injectable()
@@ -139,8 +140,11 @@ export class CallsService {
         }
 
         const durationSeconds = this.parseDurationSeconds(duration);
-        const contact =
-            await this.contactsService.findByPhoneNumber(fromNumber);
+        const normalizedFromNumber = normalizePhoneNumber(fromNumber);
+
+        const contact = normalizedFromNumber
+            ? await this.contactsService.findByPhoneNumber(normalizedFromNumber)
+            : null;
 
         try {
             const { data } =
