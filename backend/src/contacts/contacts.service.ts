@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { normalizePhoneNumber } from '../common/utils/phone-number';
 import { PrismaService } from '../prisma/prisma.service';
 
 type CreateContactInput = {
@@ -13,17 +14,25 @@ export class ContactsService {
     ) { }
 
     async create(input: CreateContactInput) {
+        const phoneNumber = normalizePhoneNumber(input.phoneNumber);
+
+        if (!phoneNumber) {
+            throw new BadRequestException(
+                'Please enter a valid phone number in international format, starting with +.',
+            );
+        }
+
         return this.prisma.$transaction(async (prisma) => {
             const contact = await prisma.contact.create({
                 data: {
                     name: input.name,
-                    phoneNumber: input.phoneNumber,
+                    phoneNumber,
                 },
             });
 
             await prisma.talkie.updateMany({
                 where: {
-                    fromNumber: input.phoneNumber,
+                    fromNumber: phoneNumber,
                     contactId: null,
                 },
                 data: {
