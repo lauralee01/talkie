@@ -1,6 +1,8 @@
 import {
   Controller,
+  Delete,
   Get,
+  HttpCode,
   Logger,
   MessageEvent,
   NotFoundException,
@@ -35,7 +37,7 @@ export class TalkiesController {
 
     return this.talkiesEventsService.newTalkie$.pipe(
       map(() => ({
-        data: { type: 'talkie.created' },
+        data: { type: 'talkie.changed' },
       })),
     );
   }
@@ -57,5 +59,11 @@ export class TalkiesController {
     return new StreamableFile(createReadStream(talkie.audioPath), {
       type: getAudioMimeType(talkie.fileFormat),
     });
+  }
+
+  @Delete(':id')
+  @HttpCode(204)
+  async delete(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
+    await this.talkiesService.delete(id);
   }
 }

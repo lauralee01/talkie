@@ -2,7 +2,12 @@
 
 import { useCallback, useState } from "react";
 import { useEventSource } from "@/hooks/use-event-source";
-import { getTalkies, getTalkiesEventsUrl, type Talkie } from "@/lib/talkies-api";
+import {
+  deleteTalkie,
+  getTalkies,
+  getTalkiesEventsUrl,
+  type Talkie,
+} from "@/lib/talkies-api";
 
 export function useTalkiesLive(initialTalkies: Talkie[]) {
   const [talkies, setTalkies] = useState(initialTalkies);
@@ -12,6 +17,23 @@ export function useTalkiesLive(initialTalkies: Talkie[]) {
       setTalkies(await getTalkies());
     } catch (error) {
       console.error("Failed to refresh Talkies:", error);
+    }
+  }, []);
+
+  const removeTalkie = useCallback(async (talkieId: string) => {
+    let previous: Talkie[] = [];
+
+    setTalkies((current) => {
+      previous = current;
+      return current.filter((talkie) => talkie.id !== talkieId);
+    });
+
+    try {
+      await deleteTalkie(talkieId);
+    } catch (error) {
+      setTalkies(previous);
+      console.error("Failed to delete Talkie:", error);
+      throw error;
     }
   }, []);
 
@@ -28,5 +50,5 @@ export function useTalkiesLive(initialTalkies: Talkie[]) {
     onError: handleError,
   });
 
-  return talkies;
+  return { talkies, removeTalkie };
 }

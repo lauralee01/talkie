@@ -12,7 +12,7 @@ type TalkieListProps = {
 };
 
 export function TalkieList({ initialTalkies }: TalkieListProps) {
-  const talkies = useTalkiesLive(initialTalkies);
+  const { talkies, removeTalkie } = useTalkiesLive(initialTalkies);
 
   return (
     <section>
@@ -28,7 +28,11 @@ export function TalkieList({ initialTalkies }: TalkieListProps) {
       ) : (
         <div className="flex flex-col gap-4">
           {talkies.map((talkie) => (
-            <TalkieCard key={talkie.id} talkie={talkie} />
+            <TalkieCard
+              key={talkie.id}
+              talkie={talkie}
+              onDelete={removeTalkie}
+            />
           ))}
         </div>
       )}

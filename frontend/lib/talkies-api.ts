@@ -18,6 +18,12 @@ export function getTalkies(): Promise<Talkie[]> {
   return apiFetch<Talkie[]>("/talkies", { cache: "no-store" });
 }
 
+export function deleteTalkie(talkieId: string): Promise<void> {
+  return apiFetch<void>(`/talkies/${talkieId}`, {
+    method: "DELETE",
+  });
+}
+
 export function getTalkieAudioUrl(talkieId: string): string {
   return `${getApiUrl()}/talkies/${talkieId}/audio`;
 }

@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { RecordingsStorageService } from '../recordings/recordings-storage.service';
 import { TalkiesEventsService } from './talkies-events.service';
 
 export type UpsertTalkieInput = {
@@ -19,6 +20,7 @@ export class TalkiesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly talkiesEventsService: TalkiesEventsService,
+    private readonly recordingsStorage: RecordingsStorageService,
   ) {}
 
   async upsert(input: UpsertTalkieInput) {
@@ -58,5 +60,20 @@ export class TalkiesService {
     return this.prisma.talkie.findUnique({
       where: { id },
     });
+  }
+
+  async delete(id: string) {
+    const talkie = await this.findById(id);
+
+    if (!talkie) {
+      throw new NotFoundException('Talkie not found');
+    }
+
+    await this.prisma.talkie.delete({
+      where: { id },
+    });
+
+    await this.recordingsStorage.delete(talkie.audioPath);
+    this.talkiesEventsService.notifyNewTalkie();
   }
 }
