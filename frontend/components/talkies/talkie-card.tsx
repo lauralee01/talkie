@@ -45,7 +45,7 @@ export function TalkieCard({ talkie, onDelete }: TalkieCardProps) {
           </p>
         </div>
 
-        <div className="flex flex-col items-end gap-2">
+        <div className="flex items-center gap-3">
           <time dateTime={talkie.createdAt} className="text-sm text-zinc-500">
             {formatTalkieDate(talkie.createdAt)}
           </time>
@@ -54,9 +54,10 @@ export function TalkieCard({ talkie, onDelete }: TalkieCardProps) {
             type="button"
             onClick={handleDelete}
             disabled={isDeleting}
-            className="text-sm text-zinc-500 transition hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+            aria-label={isDeleting ? "Deleting Talkie" : "Delete Talkie"}
+            className="rounded-lg p-1.5 text-red-600 transition hover:bg-red-50 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isDeleting ? "Deleting..." : "Delete"}
+            <TrashIcon />
           </button>
         </div>
       </div>
@@ -65,5 +66,21 @@ export function TalkieCard({ talkie, onDelete }: TalkieCardProps) {
 
       {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
     </Card>
+  );
+}
+
+function TrashIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className="size-4 fill-none stroke-current stroke-2"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3 6h18M8 6V4.5A1.5 1.5 0 0 1 9.5 3h5A1.5 1.5 0 0 1 16 4.5V6m2 0v12.5A1.5 1.5 0 0 1 16.5 20h-9A1.5 1.5 0 0 1 6 18.5V6m3 4v6m6-6v6"
+      />
+    </svg>
   );
 }
