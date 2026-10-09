@@ -55,7 +55,7 @@ export function TalkieCard({ talkie, onDelete }: TalkieCardProps) {
             onClick={handleDelete}
             disabled={isDeleting}
             aria-label={isDeleting ? "Deleting Talkie" : "Delete Talkie"}
-            className="rounded-lg p-1.5 text-red-600 transition hover:bg-red-50 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="cursor-pointer rounded-lg p-1.5 text-red-600 transition hover:bg-red-50 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <TrashIcon />
           </button>
