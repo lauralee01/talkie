@@ -1,18 +1,32 @@
-import { Test, TestingModule } from '@nestjs/testing';
+jest.mock('./contacts.service', () => ({
+  ContactsService: class ContactsService {},
+}));
+
 import { ContactsController } from './contacts.controller';
+import { ContactsService } from './contacts.service';
 
 describe('ContactsController', () => {
-  let controller: ContactsController;
+  const contactsService = {
+    create: jest.fn(),
+    findAll: jest.fn().mockResolvedValue([]),
+  } as unknown as ContactsService;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [ContactsController],
-    }).compile();
+  const controller = new ContactsController(contactsService);
 
-    controller = module.get<ContactsController>(ContactsController);
+  it('lists contacts', async () => {
+    await expect(controller.findAll()).resolves.toEqual([]);
+    expect(contactsService.findAll).toHaveBeenCalled();
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
+  it('creates contacts', async () => {
+    await controller.create({
+      name: 'Mom',
+      phoneNumber: '+12055551234',
+    });
+
+    expect(contactsService.create).toHaveBeenCalledWith({
+      name: 'Mom',
+      phoneNumber: '+12055551234',
+    });
   });
 });

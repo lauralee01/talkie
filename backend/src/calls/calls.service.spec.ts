@@ -1,18 +1,37 @@
-import { Test, TestingModule } from '@nestjs/testing';
+jest.mock('../bandwidth/bandwidth.service', () => ({
+  BandwidthService: class BandwidthService {},
+}));
+jest.mock('../recordings/recordings-storage.service', () => ({
+  RecordingsStorageService: class RecordingsStorageService {},
+}));
+jest.mock('../talkies/talkies.service', () => ({
+  TalkiesService: class TalkiesService {},
+}));
+jest.mock('../contacts/contacts.service', () => ({
+  ContactsService: class ContactsService {},
+}));
+
 import { CallsService } from './calls.service';
 
 describe('CallsService', () => {
-  let service: CallsService;
+  const service = new CallsService(
+    {} as never,
+    {} as never,
+    {} as never,
+    {} as never,
+  );
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [CallsService],
-    }).compile();
-
-    service = module.get<CallsService>(CallsService);
+  it('builds welcome bxml', () => {
+    expect(service.buildWelcomeResponse()).toContain('SpeakSentence');
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+  it('builds menu bxml for digit 1', () => {
+    expect(service.buildMenuResponse('1')).toContain('Record');
+  });
+
+  it('ignores invalid recording payloads', async () => {
+    await expect(
+      service.handleRecordingAvailablePayload({ callId: 'only-id' }),
+    ).resolves.toBeUndefined();
   });
 });

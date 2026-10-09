@@ -1,18 +1,27 @@
-import { Test, TestingModule } from '@nestjs/testing';
+jest.mock('./calls.service', () => ({
+  CallsService: class CallsService {},
+}));
+
 import { CallsController } from './calls.controller';
+import { CallsService } from './calls.service';
 
 describe('CallsController', () => {
-  let controller: CallsController;
+  const callsService = {
+    buildWelcomeResponse: jest.fn().mockReturnValue('<Response />'),
+    buildMenuResponse: jest.fn().mockReturnValue('<Response />'),
+    buildRecordingCompleteResponse: jest.fn().mockReturnValue('<Response />'),
+    handleRecordingAvailablePayload: jest.fn(),
+  } as unknown as CallsService;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [CallsController],
-    }).compile();
+  const controller = new CallsController(callsService);
 
-    controller = module.get<CallsController>(CallsController);
+  it('returns welcome bxml', () => {
+    expect(controller.incomingCall()).toBe('<Response />');
+    expect(callsService.buildWelcomeResponse).toHaveBeenCalled();
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
+  it('passes menu digits through', () => {
+    controller.menu({ digits: '1' });
+    expect(callsService.buildMenuResponse).toHaveBeenCalledWith('1');
   });
 });

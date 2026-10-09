@@ -4,22 +4,15 @@ import { CreateContactDto } from './dto/create-contact.dto';
 
 @Controller('contacts')
 export class ContactsController {
-    constructor(
-        private readonly contactsService: ContactsService,
-    ) { }
+  constructor(private readonly contactsService: ContactsService) {}
 
-    @Post()
-    async create(
-        @Body() body: CreateContactDto,
-    ) {
-        return this.contactsService.create({
-            name: body.name,
-            phoneNumber: body.phoneNumber,
-        });
-    }
+  @Post()
+  create(@Body() body: CreateContactDto) {
+    return this.contactsService.create(body);
+  }
 
-    @Get()
-    async findAll() {
-        return this.contactsService.findAll();
-    }
+  @Get()
+  findAll() {
+    return this.contactsService.findAll();
+  }
 }

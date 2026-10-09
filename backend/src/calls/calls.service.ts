@@ -1,213 +1,108 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { Bxml, Configuration, RecordingsApi } from 'bandwidth-sdk';
-import { mkdir, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { Injectable, Logger } from '@nestjs/common';
+import { BandwidthService } from '../bandwidth/bandwidth.service';
+import { parseDurationSeconds } from '../common/utils/duration';
 import { normalizePhoneNumber } from '../common/utils/phone-number';
 import { ContactsService } from '../contacts/contacts.service';
-import { TalkiesEventsService } from '../talkies/talkies-events/talkies-events.service';
+import { RecordingsStorageService } from '../recordings/recordings-storage.service';
 import { TalkiesService } from '../talkies/talkies.service';
-
+import {
+  BandwidthRecordingAvailableEvent,
+  parseRecordingAvailableEvent,
+} from './bandwidth-recording.parser';
+import {
+  buildMenuBxml,
+  buildRecordingCompleteBxml,
+  buildWelcomeBxml,
+} from './talkie-bxml';
 
 @Injectable()
 export class CallsService {
-    private readonly recordingsApi: RecordingsApi;
-    private readonly bandwidthAccountId: string;
+  private readonly logger = new Logger(CallsService.name);
 
-    constructor(
-        private readonly configService: ConfigService,
-        private readonly talkiesService: TalkiesService,
-        private readonly talkiesEventsService: TalkiesEventsService,
-        private readonly contactsService: ContactsService,
-    ) {
-        const clientId =
-            this.configService.getOrThrow<string>('BANDWIDTH_CLIENT_ID');
+  constructor(
+    private readonly bandwidthService: BandwidthService,
+    private readonly recordingsStorage: RecordingsStorageService,
+    private readonly talkiesService: TalkiesService,
+    private readonly contactsService: ContactsService,
+  ) {}
 
-        const clientSecret =
-            this.configService.getOrThrow<string>('BANDWIDTH_CLIENT_SECRET');
+  buildWelcomeResponse(): string {
+    return buildWelcomeBxml();
+  }
 
-        this.bandwidthAccountId =
-            this.configService.getOrThrow<string>('BANDWIDTH_ACCOUNT_ID');
+  buildMenuResponse(digits: string): string {
+    return buildMenuBxml(digits);
+  }
 
-        const bandwidthConfig = new Configuration({
-            clientId,
-            clientSecret,
-        });
+  buildRecordingCompleteResponse(): string {
+    return buildRecordingCompleteBxml();
+  }
 
-        this.recordingsApi = new RecordingsApi(bandwidthConfig);
+  async handleRecordingAvailablePayload(
+    body: Record<string, unknown>,
+  ): Promise<void> {
+    const event = parseRecordingAvailableEvent(body);
+
+    if (!event) {
+      this.logger.error(
+        'Bandwidth recording event is missing required fields',
+        body,
+      );
+      return;
     }
 
-    private parseDurationSeconds(duration: unknown): number {
-        if (typeof duration !== 'string') {
-            return 0;
-        }
+    await this.persistRecording(event);
+  }
 
-        const match = duration.match(/^PT([\d.]+)S$/);
+  private async persistRecording(
+    event: BandwidthRecordingAvailableEvent,
+  ): Promise<void> {
+    const {
+      callId,
+      recordingId,
+      from: fromNumber,
+      to: toNumber,
+      fileFormat,
+      duration,
+    } = event;
 
-        if (!match) {
-            return 0;
-        }
+    const durationSeconds = parseDurationSeconds(duration);
+    const normalizedFromNumber = normalizePhoneNumber(fromNumber) ?? fromNumber;
 
-        return Number(match[1]);
+    const contact =
+      await this.contactsService.findByPhoneNumber(normalizedFromNumber);
+
+    try {
+      const audioBuffer = await this.bandwidthService.downloadRecording(
+        callId,
+        recordingId,
+      );
+
+      const audioPath = await this.recordingsStorage.save(
+        recordingId,
+        fileFormat,
+        audioBuffer,
+      );
+
+      await this.talkiesService.upsert({
+        callId,
+        recordingId,
+        fromNumber: normalizedFromNumber,
+        toNumber,
+        durationSeconds,
+        fileFormat,
+        audioPath,
+        status: 'ready',
+        contactId: contact?.id,
+      });
+
+      this.logger.log(`Recording saved: ${recordingId}`);
+    } catch (error: unknown) {
+      this.logger.error('Failed to process Talkie recording', {
+        callId,
+        recordingId,
+        message: error instanceof Error ? error.message : 'Unknown error',
+      });
     }
-
-    buildBandwidthWelcomeResponse(): string {
-        const speakSentence = new Bxml.SpeakSentence(
-            'Welcome to Talkie. Press 1 to leave a message.',
-        );
-
-        const gather = new Bxml.Gather(
-            {
-                gatherUrl: '/calls/bandwidth/menu',
-                maxDigits: 1,
-            },
-            [speakSentence],
-        );
-
-        const response = new Bxml.Response(gather);
-
-        return response.toBxml();
-    }
-
-    buildBandwidthMenuResponse(digits: string): string {
-        if (digits !== '1') {
-            const speakSentence = new Bxml.SpeakSentence(
-                'Sorry, that option is not available.',
-            );
-
-            const response = new Bxml.Response(speakSentence);
-
-            return response.toBxml();
-        }
-
-        const speakSentence = new Bxml.SpeakSentence(
-            'Leave your Talkie after the beep. Press pound when you are finished.',
-        );
-
-        const record = new Bxml.Record({
-            recordCompleteUrl: '/calls/bandwidth/recording-complete',
-            recordingAvailableUrl: '/calls/bandwidth/recording-available',
-            terminatingDigits: '#',
-            maxDuration: 60,
-            fileFormat: 'wav',
-        });
-
-        const response = new Bxml.Response([
-            speakSentence,
-            record,
-        ]);
-
-        return response.toBxml();
-    }
-
-    buildBandwidthRecordingCompleteResponse(
-        event: Record<string, unknown>,
-    ): string {
-        console.log('Talkie recording complete:', event);
-
-        const speakSentence = new Bxml.SpeakSentence(
-            'Your Talkie has been saved. Goodbye.',
-        );
-
-        const response = new Bxml.Response(speakSentence);
-
-        return response.toBxml();
-    }
-
-    async handleBandwidthRecordingAvailable(
-        event: Record<string, unknown>,
-    ): Promise<void> {
-        console.log('Talkie recording available:', event);
-
-        const callId = event.callId;
-        const recordingId = event.recordingId;
-        const fromNumber = event.from;
-        const toNumber = event.to;
-        const duration = event.duration;
-        const fileFormat = event.fileFormat;
-
-        if (
-            typeof callId !== 'string' ||
-            typeof recordingId !== 'string' ||
-            typeof fromNumber !== 'string' ||
-            typeof toNumber !== 'string' ||
-            typeof fileFormat !== 'string'
-        ) {
-            console.error(
-                'Bandwidth recording event is missing required fields',
-            );
-            return;
-        }
-
-        const durationSeconds = this.parseDurationSeconds(duration);
-        const normalizedFromNumber = normalizePhoneNumber(fromNumber);
-
-        const contact = normalizedFromNumber
-            ? await this.contactsService.findByPhoneNumber(normalizedFromNumber)
-            : null;
-
-        try {
-            const { data } =
-                await this.recordingsApi.downloadCallRecording(
-                    this.bandwidthAccountId,
-                    callId,
-                    recordingId,
-                    {
-                        responseType: 'arraybuffer',
-                    },
-                );
-
-            const recordingsDirectory = join(
-                process.cwd(),
-                'recordings',
-            );
-
-            await mkdir(recordingsDirectory, {
-                recursive: true,
-            });
-
-            const filePath = join(
-                recordingsDirectory,
-                `${recordingId}.wav`,
-            );
-
-            const audioBuffer = Buffer.from(
-                data as unknown as ArrayBuffer,
-            );
-
-            await writeFile(filePath, audioBuffer);
-
-            await this.talkiesService.upsert({
-                callId,
-                recordingId,
-                fromNumber,
-                toNumber,
-                durationSeconds,
-                fileFormat,
-                audioPath: filePath,
-                status: 'ready',
-                contactId: contact?.id,
-            });
-
-            console.log(
-                'Talkie recording downloaded and persisted:',
-                {
-                    recordingId,
-                    filePath,
-                },
-            );
-        } catch (error: unknown) {
-            console.error(
-                'Failed to process Talkie recording:',
-                {
-                    callId,
-                    recordingId,
-                    message:
-                        error instanceof Error
-                            ? error.message
-                            : 'Unknown error',
-                },
-            );
-        }
-    }
+  }
 }

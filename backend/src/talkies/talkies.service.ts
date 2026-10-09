@@ -1,69 +1,62 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { TalkiesEventsService } from './talkies-events/talkies-events.service';
+import { TalkiesEventsService } from './talkies-events.service';
 
-type CreateTalkieInput = {
-    callId: string;
-    recordingId: string;
-    fromNumber: string;
-    toNumber: string;
-    durationSeconds: number;
-    fileFormat: string;
-    audioPath: string;
-    status: string;
-    contactId?: string;
+export type UpsertTalkieInput = {
+  callId: string;
+  recordingId: string;
+  fromNumber: string;
+  toNumber: string;
+  durationSeconds: number;
+  fileFormat: string;
+  audioPath: string;
+  status: string;
+  contactId?: string;
 };
 
 @Injectable()
 export class TalkiesService {
-    constructor(private readonly prisma: PrismaService, private readonly talkiesEventsService: TalkiesEventsService) { }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly talkiesEventsService: TalkiesEventsService,
+  ) {}
 
-    async upsert(input: CreateTalkieInput) {
-        const talkie = await this.prisma.talkie.upsert({
-            where: {
-                recordingId: input.recordingId,
-            },
-            update: {
-                ...input,
-            },
-            create: {
-                ...input,
-            },
-        });
+  async upsert(input: UpsertTalkieInput) {
+    const talkie = await this.prisma.talkie.upsert({
+      where: { recordingId: input.recordingId },
+      update: { ...input },
+      create: { ...input },
+    });
 
-        this.talkiesEventsService.notifyNewTalkie();
+    this.talkiesEventsService.notifyNewTalkie();
 
-        return talkie;
-    }
+    return talkie;
+  }
 
-    async findAll() {
-        return this.prisma.talkie.findMany({
-            select: {
-                id: true,
-                fromNumber: true,
-                toNumber: true,
-                durationSeconds: true,
-                fileFormat: true,
-                status: true,
-                createdAt: true,
-                contact: {
-                    select: {
-                        id: true,
-                        name: true,
-                    },
-                },
-            },
-            orderBy: {
-                createdAt: 'desc',
-            },
-        });
-    }
+  findAll() {
+    return this.prisma.talkie.findMany({
+      select: {
+        id: true,
+        fromNumber: true,
+        toNumber: true,
+        durationSeconds: true,
+        fileFormat: true,
+        status: true,
+        createdAt: true,
+        contact: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
 
-    async findById(id: string) {
-        return this.prisma.talkie.findUnique({
-            where: {
-                id,
-            },
-        });
-    }
+  findById(id: string) {
+    return this.prisma.talkie.findUnique({
+      where: { id },
+    });
+  }
 }

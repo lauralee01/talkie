@@ -1,61 +1,61 @@
 import {
-    Controller,
-    Get,
-    MessageEvent,
-    NotFoundException,
-    Param,
-    Sse,
-    StreamableFile,
+  Controller,
+  Get,
+  Logger,
+  MessageEvent,
+  NotFoundException,
+  Param,
+  ParseUUIDPipe,
+  Sse,
+  StreamableFile,
 } from '@nestjs/common';
 import { createReadStream, existsSync } from 'node:fs';
 import { Observable, map } from 'rxjs';
-import { TalkiesEventsService } from './talkies-events/talkies-events.service';
+import { getAudioMimeType } from '../common/utils/audio-mime';
+import { TalkiesEventsService } from './talkies-events.service';
 import { TalkiesService } from './talkies.service';
 
 @Controller('talkies')
 export class TalkiesController {
-    constructor(private readonly talkiesService: TalkiesService, private readonly talkiesEventsService: TalkiesEventsService) { }
+  private readonly logger = new Logger(TalkiesController.name);
 
-    @Get()
-    async findAll() {
-        return this.talkiesService.findAll();
+  constructor(
+    private readonly talkiesService: TalkiesService,
+    private readonly talkiesEventsService: TalkiesEventsService,
+  ) {}
+
+  @Get()
+  findAll() {
+    return this.talkiesService.findAll();
+  }
+
+  @Sse('events')
+  events(): Observable<MessageEvent> {
+    this.logger.debug('SSE client connected');
+
+    return this.talkiesEventsService.newTalkie$.pipe(
+      map(() => ({
+        data: { type: 'talkie.created' },
+      })),
+    );
+  }
+
+  @Get(':id/audio')
+  async getAudio(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<StreamableFile> {
+    const talkie = await this.talkiesService.findById(id);
+
+    if (!talkie) {
+      throw new NotFoundException('Talkie not found');
     }
 
-    @Get(':id/audio')
-    async getAudio(
-        @Param('id') id: string,
-    ): Promise<StreamableFile> {
-        const talkie = await this.talkiesService.findById(id);
-
-        if (!talkie) {
-            throw new NotFoundException('Talkie not found');
-        }
-
-        if (!existsSync(talkie.audioPath)) {
-            throw new NotFoundException('Talkie audio file not found');
-        }
-
-        const audioStream = createReadStream(talkie.audioPath);
-
-        return new StreamableFile(audioStream, {
-            type: 'audio/wav',
-        });
+    if (!existsSync(talkie.audioPath)) {
+      throw new NotFoundException('Talkie audio file not found');
     }
 
-    @Sse('events')
-    events(): Observable<MessageEvent> {
-        console.log('SSE client connected');
-
-        return this.talkiesEventsService.newTalkie$.pipe(
-            map(() => {
-                console.log('Sending talkie.created SSE event');
-
-                return {
-                    data: {
-                        type: 'talkie.created',
-                    },
-                };
-            }),
-        );
-    }
+    return new StreamableFile(createReadStream(talkie.audioPath), {
+      type: getAudioMimeType(talkie.fileFormat),
+    });
+  }
 }
