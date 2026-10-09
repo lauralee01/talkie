@@ -1,28 +1,27 @@
-// lib/talkies-api.ts
+import { apiFetch, getApiUrl } from "@/lib/api-client";
 
 export type Talkie = {
+  id: string;
+  fromNumber: string;
+  toNumber: string;
+  durationSeconds: number;
+  fileFormat: string;
+  status: string;
+  createdAt: string;
+  contact: {
     id: string;
-    fromNumber: string;
-    toNumber: string;
-    durationSeconds: number;
-    fileFormat: string;
-    status: string;
-    createdAt: string;
-    contact: {
-        id: string;
-        name: string;
-    } | null;
+    name: string;
+  } | null;
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+export function getTalkies(): Promise<Talkie[]> {
+  return apiFetch<Talkie[]>("/talkies", { cache: "no-store" });
+}
 
-// List all talkies
-export async function getTalkies(): Promise<Talkie[]> {
-    const response = await fetch(`${API_URL}/talkies`);
+export function getTalkieAudioUrl(talkieId: string): string {
+  return `${getApiUrl()}/talkies/${talkieId}/audio`;
+}
 
-    if (!response.ok) {
-        throw new Error('Failed to fetch Talkies');
-    }
-
-    return response.json();
+export function getTalkiesEventsUrl(): string {
+  return `${getApiUrl()}/talkies/events`;
 }
