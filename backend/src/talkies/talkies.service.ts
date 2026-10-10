@@ -15,6 +15,23 @@ export type UpsertTalkieInput = {
   contactId?: string;
 };
 
+const talkieListSelect = {
+  id: true,
+  fromNumber: true,
+  toNumber: true,
+  durationSeconds: true,
+  fileFormat: true,
+  status: true,
+  listenedAt: true,
+  createdAt: true,
+  contact: {
+    select: {
+      id: true,
+      name: true,
+    },
+  },
+} as const;
+
 @Injectable()
 export class TalkiesService {
   constructor(
@@ -37,21 +54,7 @@ export class TalkiesService {
 
   findAll() {
     return this.prisma.talkie.findMany({
-      select: {
-        id: true,
-        fromNumber: true,
-        toNumber: true,
-        durationSeconds: true,
-        fileFormat: true,
-        status: true,
-        createdAt: true,
-        contact: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
+      select: talkieListSelect,
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -59,6 +62,27 @@ export class TalkiesService {
   findById(id: string) {
     return this.prisma.talkie.findUnique({
       where: { id },
+    });
+  }
+
+  async markListened(id: string) {
+    const talkie = await this.findById(id);
+
+    if (!talkie) {
+      throw new NotFoundException('Talkie not found');
+    }
+
+    if (talkie.listenedAt) {
+      return this.prisma.talkie.findUniqueOrThrow({
+        where: { id },
+        select: talkieListSelect,
+      });
+    }
+
+    return this.prisma.talkie.update({
+      where: { id },
+      data: { listenedAt: new Date() },
+      select: talkieListSelect,
     });
   }
 

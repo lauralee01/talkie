@@ -8,6 +8,7 @@ import {
   NotFoundException,
   Param,
   ParseUUIDPipe,
+  Post,
   Sse,
   StreamableFile,
 } from '@nestjs/common';
@@ -59,6 +60,11 @@ export class TalkiesController {
     return new StreamableFile(createReadStream(talkie.audioPath), {
       type: getAudioMimeType(talkie.fileFormat),
     });
+  }
+
+  @Post(':id/listened')
+  markListened(@Param('id', ParseUUIDPipe) id: string) {
+    return this.talkiesService.markListened(id);
   }
 
   @Delete(':id')

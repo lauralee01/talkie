@@ -24,6 +24,7 @@ model Talkie {
   status          String // "available", "error", etc.
   contactId       String?
   contact         Contact? @relation(fields: [contactId], references: [id])
+  listenedAt      DateTime? // null = unread
 
   createdAt DateTime @default(now())
 }
