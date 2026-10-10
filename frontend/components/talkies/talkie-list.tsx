@@ -5,21 +5,25 @@ import { SectionHeader } from "@/components/section-header";
 import { TalkieCard } from "@/components/talkies/talkie-card";
 import { useTalkiesLive } from "@/hooks/use-talkies-live";
 import { pluralize } from "@/lib/format";
-import type { Talkie } from "@/lib/talkies-api";
+import { isTalkieUnread, type Talkie } from "@/lib/talkies-api";
 
 type TalkieListProps = {
   initialTalkies: Talkie[];
 };
 
 export function TalkieList({ initialTalkies }: TalkieListProps) {
-  const { talkies, removeTalkie } = useTalkiesLive(initialTalkies);
+  const { talkies, removeTalkie, markListened } =
+    useTalkiesLive(initialTalkies);
+
+  const unreadCount = talkies.filter(isTalkieUnread).length;
+  const meta =
+    unreadCount > 0
+      ? `${pluralize(talkies.length, "Talkie")} · ${pluralize(unreadCount, "new")}`
+      : pluralize(talkies.length, "Talkie");
 
   return (
     <section>
-      <SectionHeader
-        title="Recent"
-        meta={pluralize(talkies.length, "Talkie")}
-      />
+      <SectionHeader title="Recent" meta={meta} />
 
       {talkies.length === 0 ? (
         <EmptyState>
@@ -32,6 +36,7 @@ export function TalkieList({ initialTalkies }: TalkieListProps) {
               key={talkie.id}
               talkie={talkie}
               onDelete={removeTalkie}
+              onListened={markListened}
             />
           ))}
         </div>

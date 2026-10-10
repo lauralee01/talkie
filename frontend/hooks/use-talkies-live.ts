@@ -6,6 +6,7 @@ import {
   deleteTalkie,
   getTalkies,
   getTalkiesEventsUrl,
+  markTalkieListened,
   type Talkie,
 } from "@/lib/talkies-api";
 
@@ -37,6 +38,30 @@ export function useTalkiesLive(initialTalkies: Talkie[]) {
     }
   }, []);
 
+  const markListened = useCallback(async (talkieId: string) => {
+    let previous: Talkie[] = [];
+    const listenedAt = new Date().toISOString();
+
+    setTalkies((current) => {
+      previous = current;
+      return current.map((talkie) =>
+        talkie.id === talkieId && talkie.listenedAt === null
+          ? { ...talkie, listenedAt }
+          : talkie,
+      );
+    });
+
+    try {
+      const updated = await markTalkieListened(talkieId);
+      setTalkies((current) =>
+        current.map((talkie) => (talkie.id === talkieId ? updated : talkie)),
+      );
+    } catch (error) {
+      setTalkies(previous);
+      console.error("Failed to mark Talkie as listened:", error);
+    }
+  }, []);
+
   const handleMessage = useCallback(() => {
     void refresh();
   }, [refresh]);
@@ -50,5 +75,5 @@ export function useTalkiesLive(initialTalkies: Talkie[]) {
     onError: handleError,
   });
 
-  return { talkies, removeTalkie };
+  return { talkies, removeTalkie, markListened };
 }

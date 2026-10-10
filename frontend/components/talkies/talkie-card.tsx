@@ -4,18 +4,21 @@ import { useState } from "react";
 import { AudioPlayer } from "@/components/talkies/audio-player";
 import { Card } from "@/components/ui/card";
 import { Modal } from "@/components/ui/modal";
+import { cn } from "@/lib/cn";
 import { formatTalkieDate } from "@/lib/format";
-import type { Talkie } from "@/lib/talkies-api";
+import { isTalkieUnread, type Talkie } from "@/lib/talkies-api";
 
 type TalkieCardProps = {
   talkie: Talkie;
   onDelete: (talkieId: string) => Promise<void>;
+  onListened: (talkieId: string) => Promise<void>;
 };
 
-export function TalkieCard({ talkie, onDelete }: TalkieCardProps) {
+export function TalkieCard({ talkie, onDelete, onListened }: TalkieCardProps) {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const unread = isTalkieUnread(talkie);
 
   function openConfirm() {
     setError(null);
@@ -45,11 +48,27 @@ export function TalkieCard({ talkie, onDelete }: TalkieCardProps) {
 
   return (
     <>
-      <Card as="article">
+      <Card
+        as="article"
+        className={cn(unread && "border-zinc-950/15 ring-1 ring-zinc-950/5")}
+      >
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
-            <p className="text-sm text-zinc-500">From</p>
-            <p className="mt-1 font-medium text-zinc-950">
+            <div className="flex items-center gap-2">
+              <p className="text-sm text-zinc-500">From</p>
+              {unread ? (
+                <span className="rounded-full bg-zinc-950 px-2 py-0.5 text-[11px] font-medium tracking-wide text-white">
+                  New
+                </span>
+              ) : null}
+            </div>
+
+            <p
+              className={cn(
+                "mt-1 text-zinc-950",
+                unread ? "font-semibold" : "font-medium",
+              )}
+            >
               {talkie.contact?.name ?? talkie.fromNumber}
             </p>
           </div>
@@ -71,7 +90,14 @@ export function TalkieCard({ talkie, onDelete }: TalkieCardProps) {
           </div>
         </div>
 
-        <AudioPlayer talkieId={talkie.id} />
+        <AudioPlayer
+          talkieId={talkie.id}
+          onPlay={() => {
+            if (unread) {
+              void onListened(talkie.id);
+            }
+          }}
+        />
       </Card>
 
       <Modal
@@ -80,7 +106,7 @@ export function TalkieCard({ talkie, onDelete }: TalkieCardProps) {
         onClose={closeConfirm}
       >
         <p className="text-sm leading-6 text-zinc-600">
-          The recording will be removed permanently. This can't be undone.
+          The recording will be removed permanently. This can&apos;t be undone.
         </p>
 
         {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}

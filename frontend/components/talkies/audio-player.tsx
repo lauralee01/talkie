@@ -6,9 +6,10 @@ import { getTalkieAudioUrl } from "@/lib/talkies-api";
 
 type AudioPlayerProps = {
   talkieId: string;
+  onPlay?: () => void;
 };
 
-export function AudioPlayer({ talkieId }: AudioPlayerProps) {
+export function AudioPlayer({ talkieId, onPlay }: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -51,7 +52,10 @@ export function AudioPlayer({ talkieId }: AudioPlayerProps) {
         ref={audioRef}
         src={audioUrl}
         preload="metadata"
-        onPlay={() => setIsPlaying(true)}
+        onPlay={() => {
+          setIsPlaying(true);
+          onPlay?.();
+        }}
         onPause={() => setIsPlaying(false)}
         onEnded={handleEnded}
         onTimeUpdate={(event) => {
@@ -66,7 +70,7 @@ export function AudioPlayer({ talkieId }: AudioPlayerProps) {
         type="button"
         onClick={togglePlayback}
         aria-label={isPlaying ? "Pause Talkie" : "Play Talkie"}
-        className="flex size-10 shrink-0 items-center justify-center rounded-full bg-zinc-950 text-white transition hover:bg-zinc-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950"
+        className="flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full bg-zinc-950 text-white transition hover:bg-zinc-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950"
       >
         {isPlaying ? <PauseIcon /> : <PlayIcon />}
       </button>
