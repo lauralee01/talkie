@@ -19,8 +19,16 @@ export function ContactList({
   initialError = null,
 }: ContactListProps) {
   const [contacts, setContacts] = useState(initialContacts);
+  const [prevInitialContacts, setPrevInitialContacts] =
+    useState(initialContacts);
   const [error, setError] = useState(initialError);
   const [isRetrying, setIsRetrying] = useState(false);
+
+  if (initialContacts !== prevInitialContacts) {
+    setPrevInitialContacts(initialContacts);
+    setContacts(initialContacts);
+    setError(initialError);
+  }
 
   async function retry() {
     setIsRetrying(true);
