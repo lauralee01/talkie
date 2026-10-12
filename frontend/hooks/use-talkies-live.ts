@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import type { LiveConnectionStatus } from "@/components/live-status";
 import { useEventSource } from "@/hooks/use-event-source";
 import {
   deleteTalkie,
@@ -10,14 +11,33 @@ import {
   type Talkie,
 } from "@/lib/talkies-api";
 
-export function useTalkiesLive(initialTalkies: Talkie[]) {
+type UseTalkiesLiveResult = {
+  talkies: Talkie[];
+  liveStatus: LiveConnectionStatus;
+  refreshError: string | null;
+  removeTalkie: (talkieId: string) => Promise<void>;
+  markListened: (talkieId: string) => Promise<void>;
+  retryRefresh: () => Promise<void>;
+};
+
+export function useTalkiesLive(initialTalkies: Talkie[]): UseTalkiesLiveResult {
   const [talkies, setTalkies] = useState(initialTalkies);
+  const [prevInitialTalkies, setPrevInitialTalkies] = useState(initialTalkies);
+  const [refreshError, setRefreshError] = useState<string | null>(null);
+
+  if (initialTalkies !== prevInitialTalkies) {
+    setPrevInitialTalkies(initialTalkies);
+    setTalkies(initialTalkies);
+    setRefreshError(null);
+  }
 
   const refresh = useCallback(async () => {
     try {
       setTalkies(await getTalkies());
+      setRefreshError(null);
     } catch (error) {
       console.error("Failed to refresh Talkies:", error);
+      setRefreshError("Couldn't refresh Talkies. Showing the last loaded list.");
     }
   }, []);
 
@@ -66,14 +86,16 @@ export function useTalkiesLive(initialTalkies: Talkie[]) {
     void refresh();
   }, [refresh]);
 
-  const handleError = useCallback((event: Event) => {
-    console.error("Talkies event stream error:", event);
-  }, []);
-
-  useEventSource(getTalkiesEventsUrl(), {
+  const { status: liveStatus } = useEventSource(getTalkiesEventsUrl(), {
     onMessage: handleMessage,
-    onError: handleError,
   });
 
-  return { talkies, removeTalkie, markListened };
+  return {
+    talkies,
+    liveStatus,
+    refreshError,
+    removeTalkie,
+    markListened,
+    retryRefresh: refresh,
+  };
 }
