@@ -4,6 +4,7 @@ import Link from "next/link";
 import Script from "next/script";
 import { Navigation } from "@/components/navigation";
 import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { themeInitScript } from "@/lib/theme";
 import "./globals.css";
 
@@ -49,7 +50,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                 Talkie
               </Link>
 
-              <Navigation />
+              <div className="flex items-center gap-4 sm:gap-6">
+                <Navigation />
+                <ThemeToggle />
+              </div>
             </div>
           </header>
 
