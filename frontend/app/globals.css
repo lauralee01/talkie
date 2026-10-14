@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   color-scheme: light;
 
@@ -47,6 +49,46 @@
 
   /* Skeleton / placeholder */
   --skeleton: #e4e4e7;
+}
+
+.dark {
+  color-scheme: dark;
+
+  --background: #09090b;
+  --foreground: #fafafa;
+
+  --surface: #18181b;
+  --surface-muted: #27272a;
+  --overlay: rgb(0 0 0 / 0.65);
+
+  --border: #3f3f46;
+  --ring: #fafafa;
+
+  --muted: #a1a1aa;
+  --subtle: #71717a;
+
+  --primary: #fafafa;
+  --primary-hover: #e4e4e7;
+  --primary-foreground: #18181b;
+
+  --danger: #ef4444;
+  --danger-hover: #f87171;
+  --danger-foreground: #ffffff;
+  --danger-muted: #450a0a;
+  --danger-border: #7f1d1d;
+  --danger-text: #fecaca;
+  --danger-text-soft: rgb(254 202 202 / 0.85);
+
+  --success: #34d399;
+  --warning: #fbbf24;
+  --warning-text: #fcd34d;
+
+  --inverse: #fafafa;
+  --inverse-foreground: #18181b;
+  --inverse-muted: #52525b;
+  --inverse-subtle: #71717a;
+
+  --skeleton: #27272a;
 }
 
 @theme inline {

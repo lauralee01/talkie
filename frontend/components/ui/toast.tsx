@@ -46,7 +46,7 @@ export function Toast({ toast, onDismiss, durationMs = 5000 }: ToastProps) {
           type="button"
           onClick={onDismiss}
           aria-label="Dismiss notification"
-          className="cursor-pointer rounded-lg p-1 text-inverse-subtle transition hover:bg-white/10 hover:text-inverse-foreground"
+          className="cursor-pointer rounded-lg p-1 text-inverse-subtle transition hover:bg-inverse-foreground/10 hover:text-inverse-foreground"
         >
           <span aria-hidden="true">×</span>
         </button>
