@@ -86,6 +86,27 @@ export class TalkiesService {
     });
   }
 
+  async markUnread(id: string) {
+    const talkie = await this.findById(id);
+
+    if (!talkie) {
+      throw new NotFoundException('Talkie not found');
+    }
+
+    if (!talkie.listenedAt) {
+      return this.prisma.talkie.findUniqueOrThrow({
+        where: { id },
+        select: talkieListSelect,
+      });
+    }
+
+    return this.prisma.talkie.update({
+      where: { id },
+      data: { listenedAt: null },
+      select: talkieListSelect,
+    });
+  }
+
   async delete(id: string) {
     const talkie = await this.findById(id);
 

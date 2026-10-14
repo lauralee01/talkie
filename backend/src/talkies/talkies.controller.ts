@@ -67,6 +67,11 @@ export class TalkiesController {
     return this.talkiesService.markListened(id);
   }
 
+  @Post(':id/unread')
+  markUnread(@Param('id', ParseUUIDPipe) id: string) {
+    return this.talkiesService.markUnread(id);
+  }
+
   @Delete(':id')
   @HttpCode(204)
   async delete(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
