@@ -18,7 +18,7 @@ export function LiveStatus({ status, className }: LiveStatusProps) {
     <p
       className={cn(
         "flex items-center gap-2 text-xs",
-        status === "live" ? "text-zinc-500" : "text-amber-700",
+        status === "live" ? "text-muted" : "text-warning-text",
         className,
       )}
       aria-live="polite"
@@ -26,7 +26,7 @@ export function LiveStatus({ status, className }: LiveStatusProps) {
       <span
         className={cn(
           "size-1.5 rounded-full",
-          status === "live" ? "bg-emerald-500" : "animate-pulse bg-amber-500",
+          status === "live" ? "bg-success" : "animate-pulse bg-warning",
         )}
       />
       {LABELS[status]}

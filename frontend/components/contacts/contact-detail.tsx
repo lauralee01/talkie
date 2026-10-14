@@ -144,7 +144,7 @@ export function ContactDetailView({ contact }: ContactDetailViewProps) {
       <div className="mb-8">
         <Link
           href="/contacts"
-          className="text-sm text-zinc-500 transition hover:text-zinc-950"
+          className="text-sm text-muted transition hover:text-foreground"
         >
           ← Back to contacts
         </Link>
@@ -167,8 +167,8 @@ export function ContactDetailView({ contact }: ContactDetailViewProps) {
               className={cn(
                 "cursor-pointer text-sm font-medium transition",
                 isEditing
-                  ? "text-zinc-500 hover:text-zinc-950"
-                  : "rounded-xl bg-zinc-950 px-4 py-2.5 text-white hover:bg-zinc-800",
+                  ? "text-muted hover:text-foreground"
+                  : "rounded-xl bg-primary px-4 py-2.5 text-primary-foreground hover:bg-primary-hover",
               )}
             >
               {isEditing ? "Cancel" : "Edit"}
@@ -181,7 +181,7 @@ export function ContactDetailView({ contact }: ContactDetailViewProps) {
                 setIsDeleteOpen(true);
               }}
               aria-label="Delete contact"
-              className="cursor-pointer rounded-lg p-2 text-red-600 transition hover:bg-red-50 hover:text-red-700"
+              className="cursor-pointer rounded-lg p-2 text-danger transition hover:bg-danger-muted hover:text-danger-hover"
             >
               <TrashIcon />
             </button>
@@ -199,13 +199,13 @@ export function ContactDetailView({ contact }: ContactDetailViewProps) {
             onPhoneNumberChange={setPhoneNumber}
           />
 
-          {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}
+          {error ? <p className="mt-4 text-sm text-danger">{error}</p> : null}
 
           <div className="mt-5 flex justify-end">
             <button
               type="submit"
               disabled={isSaving}
-              className="cursor-pointer rounded-xl bg-zinc-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+              className="cursor-pointer rounded-xl bg-primary px-5 py-3 text-sm font-medium text-primary-foreground transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSaving ? "Saving..." : "Save changes"}
             </button>
@@ -245,13 +245,13 @@ export function ContactDetailView({ contact }: ContactDetailViewProps) {
           }
         }}
       >
-        <p className="text-sm leading-6 text-zinc-600">
+        <p className="text-sm leading-6 text-muted">
           {name} will be removed from your contacts. Their Talkies will stay in
           your inbox, but won&apos;t be linked to this contact anymore.
         </p>
 
         {deleteError ? (
-          <p className="mt-3 text-sm text-red-600">{deleteError}</p>
+          <p className="mt-3 text-sm text-danger">{deleteError}</p>
         ) : null}
 
         <div className="mt-6 flex justify-end gap-3">
@@ -259,7 +259,7 @@ export function ContactDetailView({ contact }: ContactDetailViewProps) {
             type="button"
             onClick={() => setIsDeleteOpen(false)}
             disabled={isDeleting}
-            className="cursor-pointer rounded-xl px-4 py-2.5 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 disabled:cursor-not-allowed disabled:opacity-50"
+            className="cursor-pointer rounded-xl px-4 py-2.5 text-sm font-medium text-muted transition hover:bg-surface-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
           >
             Cancel
           </button>
@@ -268,7 +268,7 @@ export function ContactDetailView({ contact }: ContactDetailViewProps) {
             type="button"
             onClick={() => void confirmDelete()}
             disabled={isDeleting}
-            className="cursor-pointer rounded-xl bg-red-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="cursor-pointer rounded-xl bg-danger px-4 py-2.5 text-sm font-medium text-danger-foreground transition hover:bg-danger-hover disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isDeleting ? "Deleting..." : "Delete"}
           </button>

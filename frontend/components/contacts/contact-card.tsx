@@ -11,15 +11,18 @@ export function ContactCard({ contact }: ContactCardProps) {
   const talkieCount = contact._count?.talkies ?? 0;
 
   return (
-    <Link href={`/contacts/${contact.id}`} className="block rounded-2xl outline-none transition hover:opacity-95 focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2">
+    <Link
+      href={`/contacts/${contact.id}`}
+      className="block rounded-2xl outline-none transition hover:opacity-95 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+    >
       <Card as="article" className="sm:p-5">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="font-medium text-zinc-950">{contact.name}</p>
-            <p className="mt-1 text-sm text-zinc-500">{contact.phoneNumber}</p>
+            <p className="font-medium text-foreground">{contact.name}</p>
+            <p className="mt-1 text-sm text-muted">{contact.phoneNumber}</p>
           </div>
 
-          <p className="text-sm text-zinc-500">
+          <p className="text-sm text-muted">
             {pluralize(talkieCount, "Talkie")}
           </p>
         </div>

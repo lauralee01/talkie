@@ -57,7 +57,7 @@ function Field({
 }: FieldProps) {
   return (
     <div>
-      <label htmlFor={id} className="text-sm font-medium text-zinc-700">
+      <label htmlFor={id} className="text-sm font-medium text-foreground">
         {label}
       </label>
       <input
@@ -67,7 +67,7 @@ function Field({
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
         required={required}
-        className="mt-2 w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none transition focus:border-zinc-950"
+        className="mt-2 w-full rounded-xl border border-border bg-surface px-4 py-3 outline-none transition placeholder:text-subtle focus:border-ring"
       />
     </div>
   );

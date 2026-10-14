@@ -34,8 +34,8 @@ export function Navigation() {
             className={cn(
               "text-sm transition",
               isActive
-                ? "font-medium text-zinc-950"
-                : "text-zinc-500 hover:text-zinc-950",
+                ? "font-medium text-foreground"
+                : "text-muted hover:text-foreground",
             )}
           >
             {item.label}

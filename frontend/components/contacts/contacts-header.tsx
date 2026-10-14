@@ -18,10 +18,10 @@ export function ContactsHeader() {
             type="button"
             onClick={() => setIsAddingContact((current) => !current)}
             className={cn(
-              "shrink-0 text-sm font-medium transition",
+              "shrink-0 cursor-pointer text-sm font-medium transition",
               isAddingContact
-                ? "text-zinc-500 hover:text-zinc-950"
-                : "rounded-xl bg-zinc-950 px-4 py-2.5 text-white hover:bg-zinc-800",
+                ? "text-muted hover:text-foreground"
+                : "rounded-xl bg-primary px-4 py-2.5 text-primary-foreground hover:bg-primary-hover",
             )}
           >
             {isAddingContact ? "Cancel" : "+ Add Contact"}

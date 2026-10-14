@@ -3,5 +3,5 @@ type EmptyStateProps = {
 };
 
 export function EmptyState({ children }: EmptyStateProps) {
-  return <p className="text-zinc-500">{children}</p>;
+  return <p className="text-muted">{children}</p>;
 }

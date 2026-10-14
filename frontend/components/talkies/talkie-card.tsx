@@ -70,14 +70,14 @@ export function TalkieCard({
     <>
       <Card
         as="article"
-        className={cn(unread && "border-zinc-950/15 ring-1 ring-zinc-950/5")}
+        className={cn(unread && "border-primary/15 ring-1 ring-primary/5")}
       >
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <p className="text-sm text-zinc-500">From</p>
+              <p className="text-sm text-muted">From</p>
               {unread ? (
-                <span className="rounded-full bg-zinc-950 px-2 py-0.5 text-[11px] font-medium tracking-wide text-white">
+                <span className="rounded-full bg-inverse px-2 py-0.5 text-[11px] font-medium tracking-wide text-inverse-foreground">
                   New
                 </span>
               ) : null}
@@ -85,7 +85,7 @@ export function TalkieCard({
 
             <p
               className={cn(
-                "mt-1 text-zinc-950",
+                "mt-1 text-foreground",
                 unread ? "font-semibold" : "font-medium",
               )}
             >
@@ -94,7 +94,7 @@ export function TalkieCard({
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            <time dateTime={talkie.createdAt} className="text-sm text-zinc-500">
+            <time dateTime={talkie.createdAt} className="text-sm text-muted">
               {formatTalkieDate(talkie.createdAt)}
             </time>
 
@@ -103,7 +103,7 @@ export function TalkieCard({
                 type="button"
                 onClick={() => void handleMarkUnread()}
                 disabled={isMarkingUnread}
-                className="cursor-pointer text-sm font-medium text-zinc-500 transition hover:text-zinc-950 disabled:cursor-not-allowed disabled:opacity-50"
+                className="cursor-pointer text-sm font-medium text-muted transition hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isMarkingUnread ? "Updating..." : "Mark unread"}
               </button>
@@ -114,7 +114,7 @@ export function TalkieCard({
               onClick={openConfirm}
               disabled={isDeleting}
               aria-label="Delete Talkie"
-              className="cursor-pointer rounded-lg p-1.5 text-red-600 transition hover:bg-red-50 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="cursor-pointer rounded-lg p-1.5 text-danger transition hover:bg-danger-muted hover:text-danger-hover disabled:cursor-not-allowed disabled:opacity-50"
             >
               <TrashIcon />
             </button>
@@ -131,7 +131,7 @@ export function TalkieCard({
         />
 
         {error && !isConfirmOpen ? (
-          <p className="mt-3 text-sm text-red-600">{error}</p>
+          <p className="mt-3 text-sm text-danger">{error}</p>
         ) : null}
       </Card>
 
@@ -140,18 +140,18 @@ export function TalkieCard({
         title="Delete this Talkie?"
         onClose={closeConfirm}
       >
-        <p className="text-sm leading-6 text-zinc-600">
+        <p className="text-sm leading-6 text-muted">
           The recording will be removed permanently. This can&apos;t be undone.
         </p>
 
-        {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
+        {error ? <p className="mt-3 text-sm text-danger">{error}</p> : null}
 
         <div className="mt-6 flex justify-end gap-3">
           <button
             type="button"
             onClick={closeConfirm}
             disabled={isDeleting}
-            className="cursor-pointer rounded-xl px-4 py-2.5 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 disabled:cursor-not-allowed disabled:opacity-50"
+            className="cursor-pointer rounded-xl px-4 py-2.5 text-sm font-medium text-muted transition hover:bg-surface-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
           >
             Cancel
           </button>
@@ -160,7 +160,7 @@ export function TalkieCard({
             type="button"
             onClick={confirmDelete}
             disabled={isDeleting}
-            className="cursor-pointer rounded-xl bg-red-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="cursor-pointer rounded-xl bg-danger px-4 py-2.5 text-sm font-medium text-danger-foreground transition hover:bg-danger-hover disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isDeleting ? "Deleting..." : "Delete"}
           </button>

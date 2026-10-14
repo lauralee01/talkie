@@ -32,13 +32,13 @@ export function Toast({ toast, onDismiss, durationMs = 5000 }: ToastProps) {
     <div
       role="status"
       aria-live="polite"
-      className="fixed bottom-6 left-1/2 z-50 w-[min(92vw,24rem)] -translate-x-1/2 rounded-2xl border border-zinc-200 bg-zinc-950 px-4 py-3 text-white shadow-lg"
+      className="fixed bottom-6 left-1/2 z-50 w-[min(92vw,24rem)] -translate-x-1/2 rounded-2xl border border-border bg-inverse px-4 py-3 text-inverse-foreground shadow-lg"
     >
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-sm font-medium">{toast.title}</p>
           {toast.description ? (
-            <p className="mt-1 text-sm text-zinc-300">{toast.description}</p>
+            <p className="mt-1 text-sm text-inverse-muted">{toast.description}</p>
           ) : null}
         </div>
 
@@ -46,7 +46,7 @@ export function Toast({ toast, onDismiss, durationMs = 5000 }: ToastProps) {
           type="button"
           onClick={onDismiss}
           aria-label="Dismiss notification"
-          className="cursor-pointer rounded-lg p-1 text-zinc-400 transition hover:bg-white/10 hover:text-white"
+          className="cursor-pointer rounded-lg p-1 text-inverse-subtle transition hover:bg-white/10 hover:text-inverse-foreground"
         >
           <span aria-hidden="true">×</span>
         </button>

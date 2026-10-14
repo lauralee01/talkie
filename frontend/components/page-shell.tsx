@@ -14,7 +14,7 @@ export function PageShell({
   width = "narrow",
 }: PageShellProps) {
   return (
-    <main className="min-h-[calc(100vh-4rem)] bg-zinc-50 text-zinc-950">
+    <main className="min-h-[calc(100vh-4rem)] bg-background text-foreground">
       <div
         className={cn(
           "mx-auto w-full px-6 py-10 sm:px-8 sm:py-14",

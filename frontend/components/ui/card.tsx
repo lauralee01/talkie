@@ -29,13 +29,16 @@ type CardProps = DivCardProps | ArticleCardProps | FormCardProps;
 
 export function Card({ as = "div", children, className, ...props }: CardProps) {
   const classes = cn(
-    "rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6",
+    "rounded-2xl border border-border bg-surface p-5 shadow-sm sm:p-6",
     className,
   );
 
   if (as === "form") {
     return (
-      <form className={classes} {...(props as FormHTMLAttributes<HTMLFormElement>)}>
+      <form
+        className={classes}
+        {...(props as FormHTMLAttributes<HTMLFormElement>)}
+      >
         {children}
       </form>
     );

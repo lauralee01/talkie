@@ -32,7 +32,7 @@ export function TalkiesFilterBar({
             onChange({ ...filters, query: event.target.value })
           }
           placeholder="Search by name or number"
-          className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm outline-none transition placeholder:text-zinc-400 focus:border-zinc-950"
+          className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm outline-none transition placeholder:text-subtle focus:border-ring"
         />
       </label>
 
@@ -47,7 +47,7 @@ export function TalkiesFilterBar({
                 status: event.target.value as TalkieStatusFilter,
               })
             }
-            className="w-full cursor-pointer rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-zinc-950"
+            className="w-full cursor-pointer rounded-xl border border-border bg-surface px-4 py-3 text-sm outline-none transition focus:border-ring"
           >
             <option value="all">All statuses</option>
             <option value="unread">New only</option>
@@ -62,7 +62,7 @@ export function TalkiesFilterBar({
             onChange={(event) =>
               onChange({ ...filters, contactId: event.target.value })
             }
-            className="w-full cursor-pointer rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-zinc-950"
+            className="w-full cursor-pointer rounded-xl border border-border bg-surface px-4 py-3 text-sm outline-none transition focus:border-ring"
           >
             <option value="all">All contacts</option>
             <option value="unknown">Unknown callers</option>
@@ -78,7 +78,7 @@ export function TalkiesFilterBar({
           <button
             type="button"
             onClick={() => onChange(DEFAULT_TALKIE_FILTERS)}
-            className="cursor-pointer shrink-0 text-sm font-medium text-zinc-500 transition hover:text-zinc-950 sm:px-2"
+            className="cursor-pointer shrink-0 text-sm font-medium text-muted transition hover:text-foreground sm:px-2"
           >
             Clear
           </button>

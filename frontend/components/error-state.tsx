@@ -40,16 +40,16 @@ export function ErrorState({
   return (
     <div
       role="alert"
-      className="rounded-2xl border border-red-200 bg-red-50 px-5 py-6 text-red-900"
+      className="rounded-2xl border border-danger-border bg-danger-muted px-5 py-6 text-danger-text"
     >
       <p className="font-medium">{title}</p>
-      <p className="mt-2 text-sm leading-6 text-red-800/80">{message}</p>
+      <p className="mt-2 text-sm leading-6 text-danger-text-soft">{message}</p>
 
       <button
         type="button"
         onClick={() => void handleRetry()}
         disabled={busy}
-        className="mt-4 cursor-pointer rounded-xl bg-red-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-red-800 disabled:cursor-not-allowed disabled:opacity-50"
+        className="mt-4 cursor-pointer rounded-xl bg-danger px-4 py-2.5 text-sm font-medium text-danger-foreground transition hover:bg-danger-hover disabled:cursor-not-allowed disabled:opacity-50"
       >
         {busy ? "Retrying…" : "Try again"}
       </button>

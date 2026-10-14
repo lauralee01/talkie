@@ -41,7 +41,9 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
     const seconds = Number(maxRecordingSeconds);
 
     if (!Number.isInteger(seconds) || seconds < 10 || seconds > 300) {
-      setError("Max recording length must be a whole number between 10 and 300.");
+      setError(
+        "Max recording length must be a whole number between 10 and 300.",
+      );
       setIsSaving(false);
       return;
     }
@@ -107,11 +109,11 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
         <div>
           <label
             htmlFor="max-recording-seconds"
-            className="text-sm font-medium text-zinc-700"
+            className="text-sm font-medium text-foreground"
           >
             Max recording length (seconds)
           </label>
-          <p className="mt-1 text-sm text-zinc-500">
+          <p className="mt-1 text-sm text-muted">
             Between 10 and 300 seconds.
           </p>
           <input
@@ -123,22 +125,22 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
             required
             value={maxRecordingSeconds}
             onChange={(event) => setMaxRecordingSeconds(event.target.value)}
-            className="mt-2 w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none transition focus:border-zinc-950 sm:max-w-xs"
+            className="mt-2 w-full rounded-xl border border-border bg-surface px-4 py-3 outline-none transition focus:border-ring sm:max-w-xs"
           />
         </div>
       </div>
 
-      {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}
+      {error ? <p className="mt-4 text-sm text-danger">{error}</p> : null}
 
       {savedAt ? (
-        <p className="mt-4 text-sm text-zinc-500">Settings saved.</p>
+        <p className="mt-4 text-sm text-muted">Settings saved.</p>
       ) : null}
 
       <div className="mt-6 flex justify-end">
         <button
           type="submit"
           disabled={isSaving}
-          className="cursor-pointer rounded-xl bg-zinc-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+          className="cursor-pointer rounded-xl bg-primary px-5 py-3 text-sm font-medium text-primary-foreground transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isSaving ? "Saving..." : "Save settings"}
         </button>
@@ -164,17 +166,17 @@ function PromptField({
 }: PromptFieldProps) {
   return (
     <div>
-      <label htmlFor={id} className="text-sm font-medium text-zinc-700">
+      <label htmlFor={id} className="text-sm font-medium text-foreground">
         {label}
       </label>
-      <p className="mt-1 text-sm text-zinc-500">{description}</p>
+      <p className="mt-1 text-sm text-muted">{description}</p>
       <textarea
         id={id}
         value={value}
         onChange={(event) => onChange(event.target.value)}
         required
         rows={3}
-        className="mt-2 w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none transition focus:border-zinc-950"
+        className="mt-2 w-full rounded-xl border border-border bg-surface px-4 py-3 outline-none transition focus:border-ring"
       />
     </div>
   );

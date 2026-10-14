@@ -45,13 +45,13 @@ export function AddContactForm({ onSuccess }: AddContactFormProps) {
         onPhoneNumberChange={setPhoneNumber}
       />
 
-      {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}
+      {error ? <p className="mt-4 text-sm text-danger">{error}</p> : null}
 
       <div className="mt-5 flex justify-end">
         <button
           type="submit"
           disabled={isSubmitting}
-          className="cursor-pointer rounded-xl bg-zinc-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+          className="cursor-pointer rounded-xl bg-primary px-5 py-3 text-sm font-medium text-primary-foreground transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isSubmitting ? "Adding..." : "Add Contact"}
         </button>

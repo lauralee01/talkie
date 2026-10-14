@@ -48,7 +48,7 @@ export function Modal({ open, title, children, onClose }: ModalProps) {
       <button
         type="button"
         aria-label="Close dialog"
-        className="absolute inset-0 bg-zinc-950/40"
+        className="absolute inset-0 bg-overlay"
         onClick={onClose}
       />
 
@@ -58,11 +58,11 @@ export function Modal({ open, title, children, onClose }: ModalProps) {
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className="relative z-10 w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-6 shadow-lg outline-none"
+        className="relative z-10 w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-lg outline-none"
       >
         <h2
           id={titleId}
-          className="text-lg font-semibold tracking-tight text-zinc-950"
+          className="text-lg font-semibold tracking-tight text-foreground"
         >
           {title}
         </h2>

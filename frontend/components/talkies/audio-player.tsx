@@ -70,12 +70,12 @@ export function AudioPlayer({ talkieId, onPlay }: AudioPlayerProps) {
         type="button"
         onClick={togglePlayback}
         aria-label={isPlaying ? "Pause Talkie" : "Play Talkie"}
-        className="flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full bg-zinc-950 text-white transition hover:bg-zinc-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950"
+        className="flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full bg-primary text-primary-foreground transition hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
       >
         {isPlaying ? <PauseIcon /> : <PlayIcon />}
       </button>
 
-      <span className="w-9 text-right text-xs tabular-nums text-zinc-500">
+      <span className="w-9 text-right text-xs tabular-nums text-muted">
         {formatDuration(currentTime)}
       </span>
 
@@ -87,10 +87,10 @@ export function AudioPlayer({ talkieId, onPlay }: AudioPlayerProps) {
         value={currentTime}
         onChange={handleSeek}
         aria-label="Talkie playback position"
-        className="min-w-0 flex-1 cursor-pointer accent-zinc-950"
+        className="min-w-0 flex-1 cursor-pointer accent-primary"
       />
 
-      <span className="w-9 text-xs tabular-nums text-zinc-500">
+      <span className="w-9 text-xs tabular-nums text-muted">
         {formatDuration(duration)}
       </span>
     </div>

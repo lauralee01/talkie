@@ -28,12 +28,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full font-sans">
-        <header className="border-b border-zinc-200 bg-white">
+      <body className="min-h-full bg-background font-sans text-foreground">
+        <header className="border-b border-border bg-surface">
           <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4 sm:px-8">
             <Link
               href="/"
-              className="text-lg font-semibold tracking-tight text-zinc-950"
+              className="text-lg font-semibold tracking-tight text-foreground"
             >
               Talkie
             </Link>
