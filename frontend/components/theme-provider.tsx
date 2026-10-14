@@ -57,13 +57,32 @@ function subscribe(listener: () => void) {
   };
 }
 
+let clientSnapshot: ThemeSnapshot = {
+  theme: "system",
+  resolvedTheme: "light",
+};
+
 function getSnapshot(): ThemeSnapshot {
   const theme = readStoredTheme();
-  return { theme, resolvedTheme: resolveTheme(theme) };
+  const resolvedTheme = resolveTheme(theme);
+
+  if (
+    clientSnapshot.theme !== theme ||
+    clientSnapshot.resolvedTheme !== resolvedTheme
+  ) {
+    clientSnapshot = { theme, resolvedTheme };
+  }
+
+  return clientSnapshot;
 }
 
+const serverSnapshot: ThemeSnapshot = {
+  theme: "system",
+  resolvedTheme: "light",
+};
+
 function getServerSnapshot(): ThemeSnapshot {
-  return { theme: "system", resolvedTheme: "light" };
+  return serverSnapshot;
 }
 
 type ThemeProviderProps = {
