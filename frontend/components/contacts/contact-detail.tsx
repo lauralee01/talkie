@@ -20,6 +20,7 @@ import { pluralize } from "@/lib/format";
 import {
   deleteTalkie,
   markTalkieListened,
+  markTalkieUnread,
   type Talkie,
 } from "@/lib/talkies-api";
 
@@ -117,6 +118,27 @@ export function ContactDetailView({ contact }: ContactDetailViewProps) {
     }
   }
 
+  async function markUnread(talkieId: string) {
+    let previous: Talkie[] = [];
+
+    setTalkies((current) => {
+      previous = current;
+      return current.map((talkie) =>
+        talkie.id === talkieId ? { ...talkie, listenedAt: null } : talkie,
+      );
+    });
+
+    try {
+      const updated = await markTalkieUnread(talkieId);
+      setTalkies((current) =>
+        current.map((talkie) => (talkie.id === talkieId ? updated : talkie)),
+      );
+    } catch (error) {
+      setTalkies(previous);
+      throw error;
+    }
+  }
+
   return (
     <>
       <div className="mb-8">
@@ -207,6 +229,7 @@ export function ContactDetailView({ contact }: ContactDetailViewProps) {
                 talkie={talkie}
                 onDelete={removeTalkie}
                 onListened={markListened}
+                onMarkUnread={markUnread}
               />
             ))}
           </div>

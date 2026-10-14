@@ -9,6 +9,7 @@ import {
   getTalkies,
   getTalkiesEventsUrl,
   markTalkieListened,
+  markTalkieUnread,
   type Talkie,
 } from "@/lib/talkies-api";
 
@@ -20,6 +21,7 @@ type UseTalkiesLiveResult = {
   dismissToast: () => void;
   removeTalkie: (talkieId: string) => Promise<void>;
   markListened: (talkieId: string) => Promise<void>;
+  markUnread: (talkieId: string) => Promise<void>;
   retryRefresh: () => Promise<void>;
 };
 
@@ -68,8 +70,12 @@ export function useTalkiesLive(initialTalkies: Talkie[]): UseTalkiesLiveResult {
       const latest = await getTalkies();
 
       if (announceNew) {
-        const existingIds = new Set(talkiesRef.current.map((talkie) => talkie.id));
-        const newcomers = latest.filter((talkie) => !existingIds.has(talkie.id));
+        const existingIds = new Set(
+          talkiesRef.current.map((talkie) => talkie.id),
+        );
+        const newcomers = latest.filter(
+          (talkie) => !existingIds.has(talkie.id),
+        );
         const nextToast = buildNewTalkieToast(newcomers);
 
         if (nextToast) {
@@ -126,6 +132,28 @@ export function useTalkiesLive(initialTalkies: Talkie[]): UseTalkiesLiveResult {
     }
   }, []);
 
+  const markUnread = useCallback(async (talkieId: string) => {
+    let previous: Talkie[] = [];
+
+    setTalkies((current) => {
+      previous = current;
+      return current.map((talkie) =>
+        talkie.id === talkieId ? { ...talkie, listenedAt: null } : talkie,
+      );
+    });
+
+    try {
+      const updated = await markTalkieUnread(talkieId);
+      setTalkies((current) =>
+        current.map((talkie) => (talkie.id === talkieId ? updated : talkie)),
+      );
+    } catch (error) {
+      setTalkies(previous);
+      console.error("Failed to mark Talkie as unread:", error);
+      throw error;
+    }
+  }, []);
+
   const handleMessage = useCallback(() => {
     void refresh(true);
   }, [refresh]);
@@ -146,6 +174,7 @@ export function useTalkiesLive(initialTalkies: Talkie[]): UseTalkiesLiveResult {
     dismissToast,
     removeTalkie,
     markListened,
+    markUnread,
     retryRefresh: () => refresh(false),
   };
 }

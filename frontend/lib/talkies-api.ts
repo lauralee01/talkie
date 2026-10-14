@@ -29,6 +29,12 @@ export function markTalkieListened(talkieId: string): Promise<Talkie> {
   });
 }
 
+export function markTalkieUnread(talkieId: string): Promise<Talkie> {
+  return apiFetch<Talkie>(`/talkies/${talkieId}/unread`, {
+    method: "POST",
+  });
+}
+
 export function deleteTalkie(talkieId: string): Promise<void> {
   return apiFetch<void>(`/talkies/${talkieId}`, {
     method: "DELETE",

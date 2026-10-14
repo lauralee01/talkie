@@ -43,6 +43,7 @@ export function TalkieList({
     dismissToast,
     removeTalkie,
     markListened,
+    markUnread,
     retryRefresh,
   } = useTalkiesLive(bootstrapTalkies);
 
@@ -138,6 +139,7 @@ export function TalkieList({
               talkie={talkie}
               onDelete={removeTalkie}
               onListened={markListened}
+              onMarkUnread={markUnread}
             />
           ))}
         </div>

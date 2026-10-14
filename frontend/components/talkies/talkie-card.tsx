@@ -12,11 +12,18 @@ type TalkieCardProps = {
   talkie: Talkie;
   onDelete: (talkieId: string) => Promise<void>;
   onListened: (talkieId: string) => Promise<void>;
+  onMarkUnread: (talkieId: string) => Promise<void>;
 };
 
-export function TalkieCard({ talkie, onDelete, onListened }: TalkieCardProps) {
+export function TalkieCard({
+  talkie,
+  onDelete,
+  onListened,
+  onMarkUnread,
+}: TalkieCardProps) {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isMarkingUnread, setIsMarkingUnread] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const unread = isTalkieUnread(talkie);
 
@@ -43,6 +50,19 @@ export function TalkieCard({ talkie, onDelete, onListened }: TalkieCardProps) {
     } catch {
       setError("Couldn't delete this Talkie. Please try again.");
       setIsDeleting(false);
+    }
+  }
+
+  async function handleMarkUnread() {
+    setIsMarkingUnread(true);
+    setError(null);
+
+    try {
+      await onMarkUnread(talkie.id);
+    } catch {
+      setError("Couldn't mark this Talkie as unread. Please try again.");
+    } finally {
+      setIsMarkingUnread(false);
     }
   }
 
@@ -73,10 +93,21 @@ export function TalkieCard({ talkie, onDelete, onListened }: TalkieCardProps) {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <time dateTime={talkie.createdAt} className="text-sm text-zinc-500">
               {formatTalkieDate(talkie.createdAt)}
             </time>
+
+            {!unread ? (
+              <button
+                type="button"
+                onClick={() => void handleMarkUnread()}
+                disabled={isMarkingUnread}
+                className="cursor-pointer text-sm font-medium text-zinc-500 transition hover:text-zinc-950 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isMarkingUnread ? "Updating..." : "Mark unread"}
+              </button>
+            ) : null}
 
             <button
               type="button"
@@ -98,6 +129,10 @@ export function TalkieCard({ talkie, onDelete, onListened }: TalkieCardProps) {
             }
           }}
         />
+
+        {error && !isConfirmOpen ? (
+          <p className="mt-3 text-sm text-red-600">{error}</p>
+        ) : null}
       </Card>
 
       <Modal
