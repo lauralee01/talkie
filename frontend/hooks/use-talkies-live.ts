@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { LiveConnectionStatus } from "@/components/live-status";
+import type { ToastMessage } from "@/components/ui/toast";
 import { useEventSource } from "@/hooks/use-event-source";
 import {
   deleteTalkie,
@@ -15,15 +16,46 @@ type UseTalkiesLiveResult = {
   talkies: Talkie[];
   liveStatus: LiveConnectionStatus;
   refreshError: string | null;
+  toast: ToastMessage | null;
+  dismissToast: () => void;
   removeTalkie: (talkieId: string) => Promise<void>;
   markListened: (talkieId: string) => Promise<void>;
   retryRefresh: () => Promise<void>;
 };
 
+function buildNewTalkieToast(newcomers: Talkie[]): ToastMessage | null {
+  if (newcomers.length === 0) {
+    return null;
+  }
+
+  if (newcomers.length === 1) {
+    const talkie = newcomers[0];
+    const from = talkie.contact?.name ?? talkie.fromNumber;
+
+    return {
+      id: talkie.id,
+      title: "New Talkie",
+      description: `From ${from}`,
+    };
+  }
+
+  return {
+    id: `batch-${Date.now()}`,
+    title: "New Talkies",
+    description: `${newcomers.length} new messages arrived`,
+  };
+}
+
 export function useTalkiesLive(initialTalkies: Talkie[]): UseTalkiesLiveResult {
   const [talkies, setTalkies] = useState(initialTalkies);
   const [prevInitialTalkies, setPrevInitialTalkies] = useState(initialTalkies);
   const [refreshError, setRefreshError] = useState<string | null>(null);
+  const [toast, setToast] = useState<ToastMessage | null>(null);
+  const talkiesRef = useRef(talkies);
+
+  useEffect(() => {
+    talkiesRef.current = talkies;
+  }, [talkies]);
 
   if (initialTalkies !== prevInitialTalkies) {
     setPrevInitialTalkies(initialTalkies);
@@ -31,9 +63,21 @@ export function useTalkiesLive(initialTalkies: Talkie[]): UseTalkiesLiveResult {
     setRefreshError(null);
   }
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (announceNew = false) => {
     try {
-      setTalkies(await getTalkies());
+      const latest = await getTalkies();
+
+      if (announceNew) {
+        const existingIds = new Set(talkiesRef.current.map((talkie) => talkie.id));
+        const newcomers = latest.filter((talkie) => !existingIds.has(talkie.id));
+        const nextToast = buildNewTalkieToast(newcomers);
+
+        if (nextToast) {
+          setToast(nextToast);
+        }
+      }
+
+      setTalkies(latest);
       setRefreshError(null);
     } catch (error) {
       console.error("Failed to refresh Talkies:", error);
@@ -83,8 +127,12 @@ export function useTalkiesLive(initialTalkies: Talkie[]): UseTalkiesLiveResult {
   }, []);
 
   const handleMessage = useCallback(() => {
-    void refresh();
+    void refresh(true);
   }, [refresh]);
+
+  const dismissToast = useCallback(() => {
+    setToast(null);
+  }, []);
 
   const { status: liveStatus } = useEventSource(getTalkiesEventsUrl(), {
     onMessage: handleMessage,
@@ -94,8 +142,10 @@ export function useTalkiesLive(initialTalkies: Talkie[]): UseTalkiesLiveResult {
     talkies,
     liveStatus,
     refreshError,
+    toast,
+    dismissToast,
     removeTalkie,
     markListened,
-    retryRefresh: refresh,
+    retryRefresh: () => refresh(false),
   };
 }

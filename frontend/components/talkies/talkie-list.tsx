@@ -8,6 +8,7 @@ import { LoadingState } from "@/components/loading-state";
 import { SectionHeader } from "@/components/section-header";
 import { TalkieCard } from "@/components/talkies/talkie-card";
 import { TalkiesFilterBar } from "@/components/talkies/talkies-filter-bar";
+import { Toast } from "@/components/ui/toast";
 import { useTalkiesLive } from "@/hooks/use-talkies-live";
 import {
   DEFAULT_TALKIE_FILTERS,
@@ -34,8 +35,16 @@ export function TalkieList({
   const [filters, setFilters] = useState<TalkieFilters>(DEFAULT_TALKIE_FILTERS);
   const deferredFilters = useDeferredValue(filters);
 
-  const { talkies, liveStatus, refreshError, removeTalkie, markListened, retryRefresh } =
-    useTalkiesLive(bootstrapTalkies);
+  const {
+    talkies,
+    liveStatus,
+    refreshError,
+    toast,
+    dismissToast,
+    removeTalkie,
+    markListened,
+    retryRefresh,
+  } = useTalkiesLive(bootstrapTalkies);
 
   const contactOptions = useMemo(
     () => getTalkieContactOptions(talkies),
@@ -133,6 +142,8 @@ export function TalkieList({
           ))}
         </div>
       )}
+
+      <Toast toast={toast} onDismiss={dismissToast} />
     </section>
   );
 }
