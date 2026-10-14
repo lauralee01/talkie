@@ -11,6 +11,11 @@ const NAV_ITEMS = [
     label: "Contacts",
     match: (pathname: string) => pathname.startsWith("/contacts"),
   },
+  {
+    href: "/settings",
+    label: "Settings",
+    match: (pathname: string) => pathname.startsWith("/settings"),
+  },
 ] as const;
 
 export function Navigation() {
