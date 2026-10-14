@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { CallsModule } from './calls/calls.module';
 import { ContactsModule } from './contacts/contacts.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { SettingsModule } from './settings/settings.module';
 import { TalkiesModule } from './talkies/talkies.module';
 
 @Module({
@@ -16,6 +17,7 @@ import { TalkiesModule } from './talkies/talkies.module';
     CallsModule,
     TalkiesModule,
     ContactsModule,
+    SettingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

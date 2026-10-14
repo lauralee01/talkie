@@ -4,6 +4,7 @@ import { parseDurationSeconds } from '../common/utils/duration';
 import { normalizePhoneNumber } from '../common/utils/phone-number';
 import { ContactsService } from '../contacts/contacts.service';
 import { RecordingsStorageService } from '../recordings/recordings-storage.service';
+import { SettingsService } from '../settings/settings.service';
 import { TalkiesService } from '../talkies/talkies.service';
 import {
   BandwidthRecordingAvailableEvent,
@@ -24,18 +25,22 @@ export class CallsService {
     private readonly recordingsStorage: RecordingsStorageService,
     private readonly talkiesService: TalkiesService,
     private readonly contactsService: ContactsService,
+    private readonly settingsService: SettingsService,
   ) {}
 
-  buildWelcomeResponse(): string {
-    return buildWelcomeBxml();
+  async buildWelcomeResponse(): Promise<string> {
+    const settings = await this.settingsService.get();
+    return buildWelcomeBxml(settings);
   }
 
-  buildMenuResponse(digits: string): string {
-    return buildMenuBxml(digits);
+  async buildMenuResponse(digits: string): Promise<string> {
+    const settings = await this.settingsService.get();
+    return buildMenuBxml(digits, settings);
   }
 
-  buildRecordingCompleteResponse(): string {
-    return buildRecordingCompleteBxml();
+  async buildRecordingCompleteResponse(): Promise<string> {
+    const settings = await this.settingsService.get();
+    return buildRecordingCompleteBxml(settings);
   }
 
   async handleRecordingAvailablePayload(

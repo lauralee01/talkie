@@ -8,19 +8,19 @@ export class CallsController {
 
   @Post('bandwidth/incoming')
   @Header('Content-Type', 'application/xml')
-  incomingCall(): string {
+  incomingCall(): Promise<string> {
     return this.callsService.buildWelcomeResponse();
   }
 
   @Post('bandwidth/menu')
   @Header('Content-Type', 'application/xml')
-  menu(@Body() body: BandwidthMenuDto): string {
+  menu(@Body() body: BandwidthMenuDto): Promise<string> {
     return this.callsService.buildMenuResponse(body.digits ?? '');
   }
 
   @Post('bandwidth/recording-complete')
   @Header('Content-Type', 'application/xml')
-  recordingComplete(): string {
+  recordingComplete(): Promise<string> {
     return this.callsService.buildRecordingCompleteResponse();
   }
 

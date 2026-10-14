@@ -37,3 +37,14 @@ model Contact {
 
   talkies Talkie[]
 }
+
+/// Singleton call-flow settings (one row, id = "default").
+model TalkieSettings {
+  id                   String   @id @default("default")
+  welcomePrompt        String   @default("Welcome to Talkie. Press 1 to leave a message.")
+  recordPrompt         String   @default("Leave your Talkie after the beep. Press pound when you are finished.")
+  invalidOptionPrompt  String   @default("Sorry, that option is not available.")
+  goodbyePrompt        String   @default("Your Talkie has been saved. Goodbye.")
+  maxRecordingSeconds  Int      @default(60)
+  updatedAt            DateTime @updatedAt
+}

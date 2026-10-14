@@ -1,9 +1,15 @@
 import { Bxml } from 'bandwidth-sdk';
 
-export function buildWelcomeBxml(): string {
-  const speakSentence = new Bxml.SpeakSentence(
-    'Welcome to Talkie. Press 1 to leave a message.',
-  );
+export type CallFlowPrompts = {
+  welcomePrompt: string;
+  recordPrompt: string;
+  invalidOptionPrompt: string;
+  goodbyePrompt: string;
+  maxRecordingSeconds: number;
+};
+
+export function buildWelcomeBxml(prompts: CallFlowPrompts): string {
+  const speakSentence = new Bxml.SpeakSentence(prompts.welcomePrompt);
 
   const gather = new Bxml.Gather(
     {
@@ -16,30 +22,31 @@ export function buildWelcomeBxml(): string {
   return new Bxml.Response(gather).toBxml();
 }
 
-export function buildMenuBxml(digits: string): string {
+export function buildMenuBxml(
+  digits: string,
+  prompts: CallFlowPrompts,
+): string {
   if (digits !== '1') {
     return new Bxml.Response(
-      new Bxml.SpeakSentence('Sorry, that option is not available.'),
+      new Bxml.SpeakSentence(prompts.invalidOptionPrompt),
     ).toBxml();
   }
 
-  const speakSentence = new Bxml.SpeakSentence(
-    'Leave your Talkie after the beep. Press pound when you are finished.',
-  );
+  const speakSentence = new Bxml.SpeakSentence(prompts.recordPrompt);
 
   const record = new Bxml.Record({
     recordCompleteUrl: '/calls/bandwidth/recording-complete',
     recordingAvailableUrl: '/calls/bandwidth/recording-available',
     terminatingDigits: '#',
-    maxDuration: 60,
+    maxDuration: prompts.maxRecordingSeconds,
     fileFormat: 'wav',
   });
 
   return new Bxml.Response([speakSentence, record]).toBxml();
 }
 
-export function buildRecordingCompleteBxml(): string {
+export function buildRecordingCompleteBxml(prompts: CallFlowPrompts): string {
   return new Bxml.Response(
-    new Bxml.SpeakSentence('Your Talkie has been saved. Goodbye.'),
+    new Bxml.SpeakSentence(prompts.goodbyePrompt),
   ).toBxml();
 }
