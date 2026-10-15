@@ -48,3 +48,12 @@ model TalkieSettings {
   maxRecordingSeconds  Int      @default(60)
   updatedAt            DateTime @updatedAt
 }
+
+/// Single owner account for the dashboard (bootstrapped from env).
+model User {
+  id           String   @id @default("owner")
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

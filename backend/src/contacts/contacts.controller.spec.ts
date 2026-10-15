@@ -2,6 +2,10 @@ jest.mock('./contacts.service', () => ({
   ContactsService: class ContactsService {},
 }));
 
+jest.mock('../auth/auth.guard', () => ({
+  AuthGuard: class AuthGuard {},
+}));
+
 import { ContactsController } from './contacts.controller';
 import { ContactsService } from './contacts.service';
 

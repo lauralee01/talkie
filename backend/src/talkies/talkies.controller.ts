@@ -11,14 +11,17 @@ import {
   Post,
   Sse,
   StreamableFile,
+  UseGuards,
 } from '@nestjs/common';
 import { createReadStream, existsSync } from 'node:fs';
 import { Observable, map } from 'rxjs';
+import { AuthGuard } from '../auth/auth.guard';
 import { getAudioMimeType } from '../common/utils/audio-mime';
 import { TalkiesEventsService } from './talkies-events.service';
 import { TalkiesService } from './talkies.service';
 
 @Controller('talkies')
+@UseGuards(AuthGuard)
 export class TalkiesController {
   private readonly logger = new Logger(TalkiesController.name);
 
