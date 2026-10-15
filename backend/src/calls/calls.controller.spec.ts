@@ -2,8 +2,13 @@ jest.mock('./calls.service', () => ({
   CallsService: class CallsService {},
 }));
 
+jest.mock('../bandwidth/bandwidth-callback.guard', () => ({
+  BandwidthCallbackGuard: class BandwidthCallbackGuard {},
+}));
+
 import { CallsController } from './calls.controller';
 import { CallsService } from './calls.service';
+
 
 describe('CallsController', () => {
   const callsService = {

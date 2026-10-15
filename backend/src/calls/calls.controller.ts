@@ -1,8 +1,17 @@
-import { Body, Controller, Header, HttpCode, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Header,
+  HttpCode,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+import { BandwidthCallbackGuard } from '../bandwidth/bandwidth-callback.guard';
 import { CallsService } from './calls.service';
 import { BandwidthMenuDto } from './dto/bandwidth-menu.dto';
 
 @Controller('calls')
+@UseGuards(BandwidthCallbackGuard)
 export class CallsController {
   constructor(private readonly callsService: CallsService) {}
 
