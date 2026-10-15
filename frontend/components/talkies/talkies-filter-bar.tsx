@@ -1,5 +1,6 @@
 "use client";
 
+import { Select } from "@/components/ui/select";
 import {
   DEFAULT_TALKIE_FILTERS,
   hasActiveTalkieFilters,
@@ -14,12 +15,27 @@ type TalkiesFilterBarProps = {
   onChange: (filters: TalkieFilters) => void;
 };
 
+const STATUS_OPTIONS = [
+  { value: "all", label: "All statuses" },
+  { value: "unread", label: "New only" },
+  { value: "listened", label: "Listened" },
+] as const;
+
 export function TalkiesFilterBar({
   filters,
   contactOptions,
   onChange,
 }: TalkiesFilterBarProps) {
   const active = hasActiveTalkieFilters(filters);
+
+  const contactSelectOptions = [
+    { value: "all", label: "All contacts" },
+    { value: "unknown", label: "Unknown callers" },
+    ...contactOptions.map((contact) => ({
+      value: contact.id,
+      label: contact.label,
+    })),
+  ];
 
   return (
     <div className="mb-6 space-y-3 sm:mb-8">
@@ -37,42 +53,26 @@ export function TalkiesFilterBar({
       </label>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <label className="min-w-0 flex-1">
-          <span className="sr-only">Filter by status</span>
-          <select
-            value={filters.status}
-            onChange={(event) =>
-              onChange({
-                ...filters,
-                status: event.target.value as TalkieStatusFilter,
-              })
-            }
-            className="w-full cursor-pointer rounded-xl border border-border bg-surface px-4 py-3 text-sm outline-none transition focus:border-ring"
-          >
-            <option value="all">All statuses</option>
-            <option value="unread">New only</option>
-            <option value="listened">Listened</option>
-          </select>
-        </label>
+        <Select
+          className="min-w-0 flex-1"
+          aria-label="Filter by status"
+          value={filters.status}
+          options={[...STATUS_OPTIONS]}
+          onChange={(status) =>
+            onChange({
+              ...filters,
+              status: status as TalkieStatusFilter,
+            })
+          }
+        />
 
-        <label className="min-w-0 flex-1">
-          <span className="sr-only">Filter by contact</span>
-          <select
-            value={filters.contactId}
-            onChange={(event) =>
-              onChange({ ...filters, contactId: event.target.value })
-            }
-            className="w-full cursor-pointer rounded-xl border border-border bg-surface px-4 py-3 text-sm outline-none transition focus:border-ring"
-          >
-            <option value="all">All contacts</option>
-            <option value="unknown">Unknown callers</option>
-            {contactOptions.map((contact) => (
-              <option key={contact.id} value={contact.id}>
-                {contact.label}
-              </option>
-            ))}
-          </select>
-        </label>
+        <Select
+          className="min-w-0 flex-1"
+          aria-label="Filter by contact"
+          value={filters.contactId}
+          options={contactSelectOptions}
+          onChange={(contactId) => onChange({ ...filters, contactId })}
+        />
 
         {active ? (
           <button
