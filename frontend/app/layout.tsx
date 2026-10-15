@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Link from "next/link";
 import Script from "next/script";
-import { Navigation } from "@/components/navigation";
 import { ThemeProvider } from "@/components/theme-provider";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { themeInitScript } from "@/lib/theme";
 import "./globals.css";
 
@@ -40,25 +37,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           dangerouslySetInnerHTML={{ __html: themeInitScript }}
         />
 
-        <ThemeProvider>
-          <header className="border-b border-border bg-surface">
-            <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4 sm:px-8">
-              <Link
-                href="/"
-                className="text-lg font-semibold tracking-tight text-foreground"
-              >
-                Talkie
-              </Link>
-
-              <div className="flex items-center gap-4 sm:gap-6">
-                <Navigation />
-                <ThemeToggle />
-              </div>
-            </div>
-          </header>
-
-          {children}
-        </ThemeProvider>
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

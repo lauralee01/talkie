@@ -51,6 +51,7 @@ export function AudioPlayer({ talkieId, onPlay }: AudioPlayerProps) {
       <audio
         ref={audioRef}
         src={audioUrl}
+        crossOrigin="use-credentials"
         preload="metadata"
         onPlay={() => {
           setIsPlaying(true);

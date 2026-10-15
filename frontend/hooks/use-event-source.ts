@@ -50,7 +50,7 @@ export function useEventSource(
       eventSource?.close();
 
       setStatus(attempt === 0 ? "connecting" : "reconnecting");
-      eventSource = new EventSource(streamUrl);
+      eventSource = new EventSource(streamUrl, { withCredentials: true });
 
       eventSource.onopen = () => {
         attempt = 0;
