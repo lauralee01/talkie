@@ -101,6 +101,15 @@ export class TalkiesService {
     });
   }
 
+  async markAllListened() {
+    const result = await this.prisma.talkie.updateMany({
+      where: { listenedAt: null },
+      data: { listenedAt: new Date() },
+    });
+
+    return { updatedCount: result.count };
+  }
+
   async markUnread(id: string) {
     const talkie = await this.findById(id);
 

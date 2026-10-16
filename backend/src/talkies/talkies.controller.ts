@@ -48,6 +48,11 @@ export class TalkiesController {
     );
   }
 
+  @Post('listened')
+  markAllListened() {
+    return this.talkiesService.markAllListened();
+  }
+
   @Get(':id/audio')
   async getAudio(
     @Param('id', ParseUUIDPipe) id: string,
