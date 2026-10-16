@@ -52,6 +52,7 @@ export function TalkieList({
     total,
     hasMore,
     isLoadingMore,
+    isMarkingAllListened,
     liveStatus,
     refreshError,
     toast,
@@ -59,6 +60,7 @@ export function TalkieList({
     loadMore,
     removeTalkie,
     markListened,
+    markAllListened,
     markUnread,
     retryRefresh,
   } = useTalkiesLive({ initialPage: bootstrapPage });
@@ -118,7 +120,21 @@ export function TalkieList({
       <SectionHeader
         title="Recent"
         meta={meta}
-        aside={<LiveStatus status={liveStatus} />}
+        aside={
+          <div className="flex items-center gap-3">
+            {unreadCount > 0 ? (
+              <button
+                type="button"
+                onClick={() => void markAllListened()}
+                disabled={isMarkingAllListened}
+                className="cursor-pointer text-sm font-medium text-muted transition hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isMarkingAllListened ? "Marking…" : "Mark all listened"}
+              </button>
+            ) : null}
+            <LiveStatus status={liveStatus} />
+          </div>
+        }
       />
 
       {talkies.length > 0 ? (

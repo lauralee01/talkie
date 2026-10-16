@@ -55,6 +55,12 @@ export function markTalkieListened(talkieId: string): Promise<Talkie> {
   });
 }
 
+export function markAllTalkiesListened(): Promise<{ updatedCount: number }> {
+  return apiFetch<{ updatedCount: number }>("/talkies/listened", {
+    method: "POST",
+  });
+}
+
 export function markTalkieUnread(talkieId: string): Promise<Talkie> {
   return apiFetch<Talkie>(`/talkies/${talkieId}/unread`, {
     method: "POST",

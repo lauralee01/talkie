@@ -9,6 +9,7 @@ import {
   deleteTalkie,
   getTalkies,
   getTalkiesEventsUrl,
+  markAllTalkiesListened,
   markTalkieListened,
   markTalkieUnread,
   type Talkie,
@@ -20,6 +21,7 @@ type UseTalkiesLiveResult = {
   total: number;
   hasMore: boolean;
   isLoadingMore: boolean;
+  isMarkingAllListened: boolean;
   liveStatus: LiveConnectionStatus;
   refreshError: string | null;
   toast: ToastMessage | null;
@@ -27,6 +29,7 @@ type UseTalkiesLiveResult = {
   loadMore: () => Promise<void>;
   removeTalkie: (talkieId: string) => Promise<void>;
   markListened: (talkieId: string) => Promise<void>;
+  markAllListened: () => Promise<void>;
   markUnread: (talkieId: string) => Promise<void>;
   retryRefresh: () => Promise<void>;
 };
@@ -73,6 +76,7 @@ export function useTalkiesLive({
   const [hasMore, setHasMore] = useState(initialPage.hasMore);
   const [pageSize] = useState(initialPage.pageSize || DEFAULT_TALKIES_PAGE_SIZE);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [isMarkingAllListened, setIsMarkingAllListened] = useState(false);
   const [prevInitialPage, setPrevInitialPage] = useState(initialPage);
   const [refreshError, setRefreshError] = useState<string | null>(null);
   const [toast, setToast] = useState<ToastMessage | null>(null);
@@ -211,6 +215,32 @@ export function useTalkiesLive({
     }
   }, []);
 
+  const markAllListened = useCallback(async () => {
+    let previous: Talkie[] = [];
+    const listenedAt = new Date().toISOString();
+
+    setIsMarkingAllListened(true);
+    setTalkies((current) => {
+      previous = current;
+      return current.map((talkie) =>
+        talkie.listenedAt === null ? { ...talkie, listenedAt } : talkie,
+      );
+    });
+
+    try {
+      await markAllTalkiesListened();
+      setRefreshError(null);
+    } catch (error) {
+      setTalkies(previous);
+      console.error("Failed to mark all Talkies as listened:", error);
+      setRefreshError(
+        "Couldn't mark all Talkies as listened. Please try again.",
+      );
+    } finally {
+      setIsMarkingAllListened(false);
+    }
+  }, []);
+
   const markUnread = useCallback(async (talkieId: string) => {
     let previous: Talkie[] = [];
 
@@ -250,6 +280,7 @@ export function useTalkiesLive({
     total,
     hasMore,
     isLoadingMore,
+    isMarkingAllListened,
     liveStatus,
     refreshError,
     toast,
@@ -257,6 +288,7 @@ export function useTalkiesLive({
     loadMore,
     removeTalkie,
     markListened,
+    markAllListened,
     markUnread,
     retryRefresh: () => refresh(false),
   };
