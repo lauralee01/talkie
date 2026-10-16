@@ -15,12 +15,38 @@ export type Talkie = {
   } | null;
 };
 
+export type TalkiesPage = {
+  items: Talkie[];
+  page: number;
+  pageSize: number;
+  total: number;
+  hasMore: boolean;
+};
+
+export type GetTalkiesOptions = {
+  page?: number;
+  pageSize?: number;
+};
+
+export const DEFAULT_TALKIES_PAGE_SIZE = 20;
+
 export function isTalkieUnread(talkie: Talkie): boolean {
   return talkie.listenedAt === null;
 }
 
-export function getTalkies(): Promise<Talkie[]> {
-  return apiFetch<Talkie[]>("/talkies", { cache: "no-store" });
+export function getTalkies(
+  options: GetTalkiesOptions = {},
+): Promise<TalkiesPage> {
+  const page = options.page ?? 1;
+  const pageSize = options.pageSize ?? DEFAULT_TALKIES_PAGE_SIZE;
+  const params = new URLSearchParams({
+    page: String(page),
+    pageSize: String(pageSize),
+  });
+
+  return apiFetch<TalkiesPage>(`/talkies?${params.toString()}`, {
+    cache: "no-store",
+  });
 }
 
 export function markTalkieListened(talkieId: string): Promise<Talkie> {

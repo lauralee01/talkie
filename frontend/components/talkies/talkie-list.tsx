@@ -18,34 +18,50 @@ import {
   type TalkieFilters,
 } from "@/lib/filter-talkies";
 import { pluralize } from "@/lib/format";
-import { getTalkies, isTalkieUnread, type Talkie } from "@/lib/talkies-api";
+import {
+  getTalkies,
+  isTalkieUnread,
+  type TalkiesPage,
+} from "@/lib/talkies-api";
 
 type TalkieListProps = {
-  initialTalkies?: Talkie[];
+  initialPage?: TalkiesPage;
   initialError?: string | null;
 };
 
+const EMPTY_PAGE: TalkiesPage = {
+  items: [],
+  page: 1,
+  pageSize: 20,
+  total: 0,
+  hasMore: false,
+};
+
 export function TalkieList({
-  initialTalkies = [],
+  initialPage = EMPTY_PAGE,
   initialError = null,
 }: TalkieListProps) {
   const [bootstrapError, setBootstrapError] = useState(initialError);
-  const [bootstrapTalkies, setBootstrapTalkies] = useState(initialTalkies);
+  const [bootstrapPage, setBootstrapPage] = useState(initialPage);
   const [isRetrying, setIsRetrying] = useState(false);
   const [filters, setFilters] = useState<TalkieFilters>(DEFAULT_TALKIE_FILTERS);
   const deferredFilters = useDeferredValue(filters);
 
   const {
     talkies,
+    total,
+    hasMore,
+    isLoadingMore,
     liveStatus,
     refreshError,
     toast,
     dismissToast,
+    loadMore,
     removeTalkie,
     markListened,
     markUnread,
     retryRefresh,
-  } = useTalkiesLive(bootstrapTalkies);
+  } = useTalkiesLive({ initialPage: bootstrapPage });
 
   const contactOptions = useMemo(
     () => getTalkieContactOptions(talkies),
@@ -61,7 +77,7 @@ export function TalkieList({
     setIsRetrying(true);
     try {
       const latest = await getTalkies();
-      setBootstrapTalkies(latest);
+      setBootstrapPage(latest);
       setBootstrapError(null);
     } catch {
       setBootstrapError(
@@ -94,8 +110,8 @@ export function TalkieList({
   const meta = filtersActive
     ? `${filteredTalkies.length} of ${pluralize(talkies.length, "Talkie")}`
     : unreadCount > 0
-      ? `${pluralize(talkies.length, "Talkie")} · ${pluralize(unreadCount, "new")}`
-      : pluralize(talkies.length, "Talkie");
+      ? `${pluralize(total, "Talkie")} · ${pluralize(unreadCount, "new")}`
+      : pluralize(total, "Talkie");
 
   return (
     <section>
@@ -144,6 +160,19 @@ export function TalkieList({
           ))}
         </div>
       )}
+
+      {hasMore && !filtersActive ? (
+        <div className="mt-6 flex justify-center">
+          <button
+            type="button"
+            onClick={() => void loadMore()}
+            disabled={isLoadingMore}
+            className="cursor-pointer rounded-xl border border-border bg-surface px-5 py-3 text-sm font-medium text-foreground transition hover:border-ring disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isLoadingMore ? "Loading…" : "Load more"}
+          </button>
+        </div>
+      ) : null}
 
       <Toast toast={toast} onDismiss={dismissToast} />
     </section>

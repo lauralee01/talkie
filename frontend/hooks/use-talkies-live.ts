@@ -5,24 +5,34 @@ import type { LiveConnectionStatus } from "@/components/live-status";
 import type { ToastMessage } from "@/components/ui/toast";
 import { useEventSource } from "@/hooks/use-event-source";
 import {
+  DEFAULT_TALKIES_PAGE_SIZE,
   deleteTalkie,
   getTalkies,
   getTalkiesEventsUrl,
   markTalkieListened,
   markTalkieUnread,
   type Talkie,
+  type TalkiesPage,
 } from "@/lib/talkies-api";
 
 type UseTalkiesLiveResult = {
   talkies: Talkie[];
+  total: number;
+  hasMore: boolean;
+  isLoadingMore: boolean;
   liveStatus: LiveConnectionStatus;
   refreshError: string | null;
   toast: ToastMessage | null;
   dismissToast: () => void;
+  loadMore: () => Promise<void>;
   removeTalkie: (talkieId: string) => Promise<void>;
   markListened: (talkieId: string) => Promise<void>;
   markUnread: (talkieId: string) => Promise<void>;
   retryRefresh: () => Promise<void>;
+};
+
+type UseTalkiesLiveOptions = {
+  initialPage: TalkiesPage;
 };
 
 function buildNewTalkieToast(newcomers: Talkie[]): ToastMessage | null {
@@ -48,61 +58,130 @@ function buildNewTalkieToast(newcomers: Talkie[]): ToastMessage | null {
   };
 }
 
-export function useTalkiesLive(initialTalkies: Talkie[]): UseTalkiesLiveResult {
-  const [talkies, setTalkies] = useState(initialTalkies);
-  const [prevInitialTalkies, setPrevInitialTalkies] = useState(initialTalkies);
+function mergeById(existing: Talkie[], incoming: Talkie[]): Talkie[] {
+  const seen = new Set(existing.map((talkie) => talkie.id));
+  const additions = incoming.filter((talkie) => !seen.has(talkie.id));
+  return [...existing, ...additions];
+}
+
+export function useTalkiesLive({
+  initialPage,
+}: UseTalkiesLiveOptions): UseTalkiesLiveResult {
+  const [talkies, setTalkies] = useState(initialPage.items);
+  const [page, setPage] = useState(initialPage.page);
+  const [total, setTotal] = useState(initialPage.total);
+  const [hasMore, setHasMore] = useState(initialPage.hasMore);
+  const [pageSize] = useState(initialPage.pageSize || DEFAULT_TALKIES_PAGE_SIZE);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [prevInitialPage, setPrevInitialPage] = useState(initialPage);
   const [refreshError, setRefreshError] = useState<string | null>(null);
   const [toast, setToast] = useState<ToastMessage | null>(null);
   const talkiesRef = useRef(talkies);
+  const pageRef = useRef(page);
 
   useEffect(() => {
     talkiesRef.current = talkies;
   }, [talkies]);
 
-  if (initialTalkies !== prevInitialTalkies) {
-    setPrevInitialTalkies(initialTalkies);
-    setTalkies(initialTalkies);
+  useEffect(() => {
+    pageRef.current = page;
+  }, [page]);
+
+  if (initialPage !== prevInitialPage) {
+    setPrevInitialPage(initialPage);
+    setTalkies(initialPage.items);
+    setPage(initialPage.page);
+    setTotal(initialPage.total);
+    setHasMore(initialPage.hasMore);
     setRefreshError(null);
   }
 
-  const refresh = useCallback(async (announceNew = false) => {
-    try {
-      const latest = await getTalkies();
-
-      if (announceNew) {
-        const existingIds = new Set(
-          talkiesRef.current.map((talkie) => talkie.id),
+  const refresh = useCallback(
+    async (announceNew = false) => {
+      try {
+        const loadedPages = Math.max(pageRef.current, 1);
+        const pages = await Promise.all(
+          Array.from({ length: loadedPages }, (_, index) =>
+            getTalkies({ page: index + 1, pageSize }),
+          ),
         );
-        const newcomers = latest.filter(
-          (talkie) => !existingIds.has(talkie.id),
-        );
-        const nextToast = buildNewTalkieToast(newcomers);
 
-        if (nextToast) {
-          setToast(nextToast);
+        const latest = pages.reduce<Talkie[]>(
+          (all, current) => mergeById(all, current.items),
+          [],
+        );
+        const lastPage = pages[pages.length - 1];
+
+        if (announceNew) {
+          const existingIds = new Set(
+            talkiesRef.current.map((talkie) => talkie.id),
+          );
+          const newcomers = latest.filter(
+            (talkie) => !existingIds.has(talkie.id),
+          );
+          const nextToast = buildNewTalkieToast(newcomers);
+
+          if (nextToast) {
+            setToast(nextToast);
+          }
         }
-      }
 
-      setTalkies(latest);
+        setTalkies(latest);
+        setTotal(lastPage.total);
+        setHasMore(lastPage.hasMore);
+        setRefreshError(null);
+      } catch (error) {
+        console.error("Failed to refresh Talkies:", error);
+        setRefreshError(
+          "Couldn't refresh Talkies. Showing the last loaded list.",
+        );
+      }
+    },
+    [pageSize],
+  );
+
+  const loadMore = useCallback(async () => {
+    if (isLoadingMore || !hasMore) {
+      return;
+    }
+
+    setIsLoadingMore(true);
+
+    try {
+      const nextPage = pageRef.current + 1;
+      const result = await getTalkies({ page: nextPage, pageSize });
+
+      setTalkies((current) => mergeById(current, result.items));
+      setPage(result.page);
+      setTotal(result.total);
+      setHasMore(result.hasMore);
       setRefreshError(null);
     } catch (error) {
-      console.error("Failed to refresh Talkies:", error);
-      setRefreshError("Couldn't refresh Talkies. Showing the last loaded list.");
+      console.error("Failed to load more Talkies:", error);
+      setRefreshError("Couldn't load more Talkies. Please try again.");
+    } finally {
+      setIsLoadingMore(false);
     }
-  }, []);
+  }, [hasMore, isLoadingMore, pageSize]);
 
   const removeTalkie = useCallback(async (talkieId: string) => {
     let previous: Talkie[] = [];
+    let previousTotal = 0;
 
     setTalkies((current) => {
       previous = current;
       return current.filter((talkie) => talkie.id !== talkieId);
+    });
+    setTotal((current) => {
+      previousTotal = current;
+      return Math.max(0, current - 1);
     });
 
     try {
       await deleteTalkie(talkieId);
     } catch (error) {
       setTalkies(previous);
+      setTotal(previousTotal);
       console.error("Failed to delete Talkie:", error);
       throw error;
     }
@@ -168,10 +247,14 @@ export function useTalkiesLive(initialTalkies: Talkie[]): UseTalkiesLiveResult {
 
   return {
     talkies,
+    total,
+    hasMore,
+    isLoadingMore,
     liveStatus,
     refreshError,
     toast,
     dismissToast,
+    loadMore,
     removeTalkie,
     markListened,
     markUnread,

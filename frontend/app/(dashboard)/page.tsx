@@ -20,7 +20,7 @@ export default async function Home() {
       />
 
       {result.ok ? (
-        <TalkieList initialTalkies={result.data} />
+        <TalkieList initialPage={result.data} />
       ) : (
         <TalkieList initialError={result.error} />
       )}
