@@ -52,11 +52,26 @@ export class TalkiesService {
     return talkie;
   }
 
-  findAll() {
-    return this.prisma.talkie.findMany({
-      select: talkieListSelect,
-      orderBy: { createdAt: 'desc' },
-    });
+  async findPage(page: number, pageSize: number) {
+    const skip = (page - 1) * pageSize;
+
+    const [items, total] = await this.prisma.$transaction([
+      this.prisma.talkie.findMany({
+        select: talkieListSelect,
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: pageSize,
+      }),
+      this.prisma.talkie.count(),
+    ]);
+
+    return {
+      items,
+      page,
+      pageSize,
+      total,
+      hasMore: skip + items.length < total,
+    };
   }
 
   findById(id: string) {

@@ -9,6 +9,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
   Sse,
   StreamableFile,
   UseGuards,
@@ -17,6 +18,7 @@ import { createReadStream, existsSync } from 'node:fs';
 import { Observable, map } from 'rxjs';
 import { AuthGuard } from '../auth/auth.guard';
 import { getAudioMimeType } from '../common/utils/audio-mime';
+import { ListTalkiesQueryDto } from './dto/list-talkies-query.dto';
 import { TalkiesEventsService } from './talkies-events.service';
 import { TalkiesService } from './talkies.service';
 
@@ -31,8 +33,8 @@ export class TalkiesController {
   ) {}
 
   @Get()
-  findAll() {
-    return this.talkiesService.findAll();
+  findPage(@Query() query: ListTalkiesQueryDto) {
+    return this.talkiesService.findPage(query.page, query.pageSize);
   }
 
   @Sse('events')
