@@ -64,6 +64,40 @@ function redirectToLogin() {
   window.location.assign(`/login?${params.toString()}`);
 }
 
+async function readErrorMessage(
+  response: Response,
+  path: string,
+): Promise<string> {
+  const fallback = `API request failed (${response.status}): ${path}`;
+
+  try {
+    const contentType = response.headers.get("content-type") ?? "";
+    if (!contentType.includes("application/json")) {
+      return fallback;
+    }
+
+    const body = (await response.json()) as { message?: unknown };
+    if (typeof body.message === "string" && body.message.trim()) {
+      return body.message.trim();
+    }
+
+    if (Array.isArray(body.message)) {
+      const parts = body.message
+        .filter((part): part is string => typeof part === "string")
+        .map((part) => part.trim())
+        .filter(Boolean);
+
+      if (parts.length > 0) {
+        return parts.join(" ");
+      }
+    }
+  } catch {
+    // Ignore body parse failures and use the fallback.
+  }
+
+  return fallback;
+}
+
 export async function apiFetch<T>(
   path: string,
   options: ApiFetchOptions = {},
@@ -88,7 +122,7 @@ export async function apiFetch<T>(
     }
 
     throw new ApiError(
-      `API request failed (${response.status}): ${path}`,
+      await readErrorMessage(response, path),
       response.status,
       path,
     );

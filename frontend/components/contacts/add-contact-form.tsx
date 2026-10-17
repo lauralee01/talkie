@@ -4,7 +4,10 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ContactFormFields } from "@/components/contacts/contact-form-fields";
 import { Card } from "@/components/ui/card";
-import { createContact } from "@/lib/contacts-api";
+import {
+  createContact,
+  getContactMutationErrorMessage,
+} from "@/lib/contacts-api";
 
 type AddContactFormProps = {
   onSuccess: () => void;
@@ -28,8 +31,13 @@ export function AddContactForm({ onSuccess }: AddContactFormProps) {
       setPhoneNumber("");
       onSuccess();
       router.refresh();
-    } catch {
-      setError("We couldn't add this contact. Please try again.");
+    } catch (error) {
+      setError(
+        getContactMutationErrorMessage(
+          error,
+          "We couldn't add this contact. Please try again.",
+        ),
+      );
     } finally {
       setIsSubmitting(false);
     }

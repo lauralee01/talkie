@@ -1,4 +1,4 @@
-import { apiFetch } from "@/lib/api-client";
+import { ApiError, apiFetch } from "@/lib/api-client";
 import type { Talkie } from "@/lib/talkies-api";
 
 export type Contact = {
@@ -53,4 +53,21 @@ export function deleteContact(contactId: string): Promise<void> {
   return apiFetch<void>(`/contacts/${contactId}`, {
     method: "DELETE",
   });
+}
+
+export function getContactMutationErrorMessage(
+  error: unknown,
+  fallback: string,
+): string {
+  if (error instanceof ApiError) {
+    if (error.status === 409 || error.status === 400) {
+      return error.message;
+    }
+
+    if (error.status === 404) {
+      return "That contact could not be found.";
+    }
+  }
+
+  return fallback;
 }

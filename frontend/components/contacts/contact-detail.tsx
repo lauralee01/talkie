@@ -13,6 +13,7 @@ import { Modal } from "@/components/ui/modal";
 import { cn } from "@/lib/cn";
 import {
   deleteContact,
+  getContactMutationErrorMessage,
   updateContact,
   type ContactDetail,
 } from "@/lib/contacts-api";
@@ -51,8 +52,13 @@ export function ContactDetailView({ contact }: ContactDetailViewProps) {
       setPhoneNumber(updated.phoneNumber);
       setIsEditing(false);
       router.refresh();
-    } catch {
-      setError("We couldn't update this contact. Please try again.");
+    } catch (error) {
+      setError(
+        getContactMutationErrorMessage(
+          error,
+          "We couldn't update this contact. Please try again.",
+        ),
+      );
     } finally {
       setIsSaving(false);
     }
@@ -73,8 +79,13 @@ export function ContactDetailView({ contact }: ContactDetailViewProps) {
       await deleteContact(contact.id);
       router.push("/contacts");
       router.refresh();
-    } catch {
-      setDeleteError("Couldn't delete this contact. Please try again.");
+    } catch (error) {
+      setDeleteError(
+        getContactMutationErrorMessage(
+          error,
+          "Couldn't delete this contact. Please try again.",
+        ),
+      );
       setIsDeleting(false);
     }
   }
