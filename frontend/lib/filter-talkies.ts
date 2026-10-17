@@ -19,6 +19,11 @@ export type TalkieContactOption = {
   label: string;
 };
 
+/** Strip everything except digits so `555-0123` can match `+15550123`. */
+export function digitsOnly(value: string): string {
+  return value.replace(/\D/g, "");
+}
+
 export function getTalkieContactOptions(
   talkies: Talkie[],
 ): TalkieContactOption[] {
@@ -43,12 +48,37 @@ export function hasActiveTalkieFilters(filters: TalkieFilters): boolean {
   );
 }
 
+function matchesTalkieQuery(talkie: Talkie, query: string): boolean {
+  const normalizedQuery = query.trim().toLowerCase();
+  if (!normalizedQuery) {
+    return true;
+  }
+
+  const name = (talkie.contact?.name ?? "").toLowerCase();
+  if (name.includes(normalizedQuery)) {
+    return true;
+  }
+
+  const numbers = [talkie.fromNumber, talkie.toNumber];
+
+  if (
+    numbers.some((number) => number.toLowerCase().includes(normalizedQuery))
+  ) {
+    return true;
+  }
+
+  const queryDigits = digitsOnly(normalizedQuery);
+  if (queryDigits.length === 0) {
+    return false;
+  }
+
+  return numbers.some((number) => digitsOnly(number).includes(queryDigits));
+}
+
 export function filterTalkies(
   talkies: Talkie[],
   filters: TalkieFilters,
 ): Talkie[] {
-  const query = filters.query.trim().toLowerCase();
-
   return talkies.filter((talkie) => {
     if (filters.status === "unread" && !isTalkieUnread(talkie)) {
       return false;
@@ -70,18 +100,6 @@ export function filterTalkies(
       return false;
     }
 
-    if (!query) {
-      return true;
-    }
-
-    const haystack = [
-      talkie.contact?.name ?? "",
-      talkie.fromNumber,
-      talkie.toNumber,
-    ]
-      .join(" ")
-      .toLowerCase();
-
-    return haystack.includes(query);
+    return matchesTalkieQuery(talkie, filters.query);
   });
 }
