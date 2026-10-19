@@ -27,6 +27,11 @@ model Talkie {
   listenedAt      DateTime? // null = unread
 
   createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([listenedAt])
+  @@index([fromNumber, contactId])
+  @@index([contactId, createdAt])
 }
 
 model Contact {

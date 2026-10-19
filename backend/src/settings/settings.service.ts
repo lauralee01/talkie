@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateSettingsDto } from './dto/update-settings.dto';
 
@@ -15,21 +15,37 @@ export type CallFlowSettings = {
 };
 
 @Injectable()
-export class SettingsService {
+export class SettingsService implements OnModuleInit {
+  private readonly logger = new Logger(SettingsService.name);
+  private cache: CallFlowSettings | null = null;
+
   constructor(private readonly prisma: PrismaService) {}
 
+  async onModuleInit() {
+    await this.ensureDefaults();
+  }
+
   async get(): Promise<CallFlowSettings> {
-    return this.prisma.talkieSettings.upsert({
+    if (this.cache) {
+      return this.cache;
+    }
+
+    const settings = await this.prisma.talkieSettings.findUnique({
       where: { id: DEFAULT_SETTINGS_ID },
-      update: {},
-      create: { id: DEFAULT_SETTINGS_ID },
     });
+
+    if (settings) {
+      this.cache = settings;
+      return settings;
+    }
+
+    return this.ensureDefaults();
   }
 
   async update(input: UpdateSettingsDto): Promise<CallFlowSettings> {
     await this.get();
 
-    return this.prisma.talkieSettings.update({
+    const updated = await this.prisma.talkieSettings.update({
       where: { id: DEFAULT_SETTINGS_ID },
       data: {
         ...(input.welcomePrompt !== undefined
@@ -49,5 +65,20 @@ export class SettingsService {
           : {}),
       },
     });
+
+    this.cache = updated;
+    return updated;
+  }
+
+  private async ensureDefaults(): Promise<CallFlowSettings> {
+    const settings = await this.prisma.talkieSettings.upsert({
+      where: { id: DEFAULT_SETTINGS_ID },
+      update: {},
+      create: { id: DEFAULT_SETTINGS_ID },
+    });
+
+    this.cache = settings;
+    this.logger.log('Call-flow settings ready');
+    return settings;
   }
 }

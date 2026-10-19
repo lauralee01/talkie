@@ -17,7 +17,7 @@ export type AuthenticatedRequest = Request & {
 export class AuthGuard implements CanActivate {
   constructor(private readonly authService: AuthService) {}
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const token = request.cookies?.[AUTH_SESSION_COOKIE] as string | undefined;
 
@@ -25,7 +25,7 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException('Authentication required.');
     }
 
-    request.user = await this.authService.verifySessionToken(token);
+    request.user = this.authService.verifySessionToken(token);
     return true;
   }
 }

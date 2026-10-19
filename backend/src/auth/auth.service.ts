@@ -57,16 +57,16 @@ export class AuthService implements OnModuleInit {
     });
   }
 
-  async verifySessionToken(token: string): Promise<AuthUser> {
+  verifySessionToken(token: string): AuthUser {
     try {
       const payload = verify(token, this.getSecret()) as SessionPayload;
-      const user = await this.getUserById(payload.sub);
 
-      if (!user || user.email !== payload.email) {
+      if (!payload.sub || !payload.email) {
         throw new UnauthorizedException('Invalid session.');
       }
 
-      return user;
+      // Trust signed JWT claims — avoids a DB hit on every authenticated request.
+      return { id: payload.sub, email: payload.email };
     } catch {
       throw new UnauthorizedException('Invalid session.');
     }

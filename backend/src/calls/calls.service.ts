@@ -74,14 +74,11 @@ export class CallsService {
     const durationSeconds = parseDurationSeconds(duration);
     const normalizedFromNumber = normalizePhoneNumber(fromNumber) ?? fromNumber;
 
-    const contact =
-      await this.contactsService.findByPhoneNumber(normalizedFromNumber);
-
     try {
-      const audioBuffer = await this.bandwidthService.downloadRecording(
-        callId,
-        recordingId,
-      );
+      const [contact, audioBuffer] = await Promise.all([
+        this.contactsService.findByPhoneNumber(normalizedFromNumber),
+        this.bandwidthService.downloadRecording(callId, recordingId),
+      ]);
 
       const audioPath = await this.recordingsStorage.save(
         recordingId,

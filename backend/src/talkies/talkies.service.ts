@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { isPrismaNotFoundError } from '../common/utils/prisma-errors';
 import { PrismaService } from '../prisma/prisma.service';
 import { RecordingsStorageService } from '../recordings/recordings-storage.service';
 import { TalkiesEventsService } from './talkies-events.service';
@@ -81,24 +82,19 @@ export class TalkiesService {
   }
 
   async markListened(id: string) {
-    const talkie = await this.findById(id);
-
-    if (!talkie) {
-      throw new NotFoundException('Talkie not found');
-    }
-
-    if (talkie.listenedAt) {
-      return this.prisma.talkie.findUniqueOrThrow({
+    try {
+      return await this.prisma.talkie.update({
         where: { id },
+        data: { listenedAt: new Date() },
         select: talkieListSelect,
       });
-    }
+    } catch (error) {
+      if (isPrismaNotFoundError(error)) {
+        throw new NotFoundException('Talkie not found');
+      }
 
-    return this.prisma.talkie.update({
-      where: { id },
-      data: { listenedAt: new Date() },
-      select: talkieListSelect,
-    });
+      throw error;
+    }
   }
 
   async markAllListened() {
@@ -111,38 +107,35 @@ export class TalkiesService {
   }
 
   async markUnread(id: string) {
-    const talkie = await this.findById(id);
-
-    if (!talkie) {
-      throw new NotFoundException('Talkie not found');
-    }
-
-    if (!talkie.listenedAt) {
-      return this.prisma.talkie.findUniqueOrThrow({
+    try {
+      return await this.prisma.talkie.update({
         where: { id },
+        data: { listenedAt: null },
         select: talkieListSelect,
       });
-    }
+    } catch (error) {
+      if (isPrismaNotFoundError(error)) {
+        throw new NotFoundException('Talkie not found');
+      }
 
-    return this.prisma.talkie.update({
-      where: { id },
-      data: { listenedAt: null },
-      select: talkieListSelect,
-    });
+      throw error;
+    }
   }
 
   async delete(id: string) {
-    const talkie = await this.findById(id);
+    try {
+      const talkie = await this.prisma.talkie.delete({
+        where: { id },
+      });
 
-    if (!talkie) {
-      throw new NotFoundException('Talkie not found');
+      await this.recordingsStorage.delete(talkie.audioPath);
+      this.talkiesEventsService.notifyNewTalkie();
+    } catch (error) {
+      if (isPrismaNotFoundError(error)) {
+        throw new NotFoundException('Talkie not found');
+      }
+
+      throw error;
     }
-
-    await this.prisma.talkie.delete({
-      where: { id },
-    });
-
-    await this.recordingsStorage.delete(talkie.audioPath);
-    this.talkiesEventsService.notifyNewTalkie();
   }
 }
