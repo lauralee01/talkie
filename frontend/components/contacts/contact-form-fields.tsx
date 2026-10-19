@@ -39,7 +39,7 @@ export function ContactFormFields({
         type="tel"
         value={phoneNumber}
         onChange={onPhoneNumberChange}
-        placeholder="+12055551234"
+        placeholder="(205) 555-1234"
         required
       />
     </div>
