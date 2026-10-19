@@ -123,6 +123,7 @@ export function TalkieCard({
 
         <AudioPlayer
           talkieId={talkie.id}
+          durationSeconds={talkie.durationSeconds}
           onPlay={() => {
             if (unread) {
               void onListened(talkie.id);

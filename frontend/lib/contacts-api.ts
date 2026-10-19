@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { ApiError, apiFetch } from "@/lib/api-client";
 import type { Talkie } from "@/lib/talkies-api";
 
@@ -26,11 +27,14 @@ export function getContacts(): Promise<Contact[]> {
   return apiFetch<Contact[]>("/contacts", { cache: "no-store" });
 }
 
-export function getContact(contactId: string): Promise<ContactDetail> {
+/** Dedupes metadata + page fetches for the same contact in one request. */
+export const getContact = cache(async function getContact(
+  contactId: string,
+): Promise<ContactDetail> {
   return apiFetch<ContactDetail>(`/contacts/${contactId}`, {
     cache: "no-store",
   });
-}
+});
 
 export function createContact(input: CreateContactInput): Promise<Contact> {
   return apiFetch<Contact>("/contacts", {

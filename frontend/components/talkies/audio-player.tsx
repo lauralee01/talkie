@@ -6,14 +6,19 @@ import { getTalkieAudioUrl } from "@/lib/talkies-api";
 
 type AudioPlayerProps = {
   talkieId: string;
+  durationSeconds?: number;
   onPlay?: () => void;
 };
 
-export function AudioPlayer({ talkieId, onPlay }: AudioPlayerProps) {
+export function AudioPlayer({
+  talkieId,
+  durationSeconds = 0,
+  onPlay,
+}: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
+  const [duration, setDuration] = useState(durationSeconds);
 
   const audioUrl = getTalkieAudioUrl(talkieId);
 
@@ -52,7 +57,7 @@ export function AudioPlayer({ talkieId, onPlay }: AudioPlayerProps) {
         ref={audioRef}
         src={audioUrl}
         crossOrigin="use-credentials"
-        preload="metadata"
+        preload="none"
         onPlay={() => {
           setIsPlaying(true);
           onPlay?.();

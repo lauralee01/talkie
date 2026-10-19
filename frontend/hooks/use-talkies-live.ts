@@ -103,18 +103,13 @@ export function useTalkiesLive({
   const refresh = useCallback(
     async (announceNew = false) => {
       try {
-        const loadedPages = Math.max(pageRef.current, 1);
-        const pages = await Promise.all(
-          Array.from({ length: loadedPages }, (_, index) =>
-            getTalkies({ page: index + 1, pageSize }),
-          ),
+        // One request covering what's already loaded (capped at API max).
+        const refreshSize = Math.min(
+          100,
+          Math.max(pageSize, talkiesRef.current.length),
         );
-
-        const latest = pages.reduce<Talkie[]>(
-          (all, current) => mergeById(all, current.items),
-          [],
-        );
-        const lastPage = pages[pages.length - 1];
+        const result = await getTalkies({ page: 1, pageSize: refreshSize });
+        const latest = result.items;
 
         if (announceNew) {
           const existingIds = new Set(
@@ -131,8 +126,9 @@ export function useTalkiesLive({
         }
 
         setTalkies(latest);
-        setTotal(lastPage.total);
-        setHasMore(lastPage.hasMore);
+        setPage(Math.max(1, Math.ceil(latest.length / pageSize)));
+        setTotal(result.total);
+        setHasMore(result.hasMore);
         setRefreshError(null);
       } catch (error) {
         console.error("Failed to refresh Talkies:", error);
