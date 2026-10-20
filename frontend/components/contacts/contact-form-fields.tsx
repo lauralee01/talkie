@@ -1,3 +1,5 @@
+import { formatPhoneInput } from "@/lib/format";
+
 type FieldProps = {
   id: string;
   label: string;
@@ -37,8 +39,8 @@ export function ContactFormFields({
         id={`${idPrefix}-phone`}
         label="Phone number"
         type="tel"
-        value={phoneNumber}
-        onChange={onPhoneNumberChange}
+        value={formatPhoneInput(phoneNumber)}
+        onChange={(value) => onPhoneNumberChange(formatPhoneInput(value))}
         placeholder="(205) 555-1234"
         required
       />

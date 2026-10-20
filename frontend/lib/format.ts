@@ -47,3 +47,43 @@ export function pluralize(
 ): string {
   return `${count} ${count === 1 ? singular : plural}`;
 }
+
+function nationalDigits(value: string): string {
+  let digits = value.replace(/\D/g, "");
+
+  if (digits.length === 11 && digits.startsWith("1")) {
+    digits = digits.slice(1);
+  }
+
+  return digits.slice(0, 10);
+}
+
+/** Display a stored number as `(205) 555-1234`. Falls back to the original. */
+export function formatPhoneNumber(value: string): string {
+  const digits = nationalDigits(value);
+
+  if (digits.length !== 10) {
+    return value;
+  }
+
+  return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+}
+
+/** Format a contact phone field as the user types. */
+export function formatPhoneInput(value: string): string {
+  const digits = nationalDigits(value);
+
+  if (digits.length === 0) {
+    return "";
+  }
+
+  if (digits.length < 4) {
+    return `(${digits}`;
+  }
+
+  if (digits.length < 7) {
+    return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+  }
+
+  return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+}

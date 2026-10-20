@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { LiveConnectionStatus } from "@/components/live-status";
 import type { ToastMessage } from "@/components/ui/toast";
 import { useEventSource } from "@/hooks/use-event-source";
+import { formatPhoneNumber } from "@/lib/format";
 import {
   DEFAULT_TALKIES_PAGE_SIZE,
   deleteTalkie,
@@ -45,7 +46,7 @@ function buildNewTalkieToast(newcomers: Talkie[]): ToastMessage | null {
 
   if (newcomers.length === 1) {
     const talkie = newcomers[0];
-    const from = talkie.contact?.name ?? talkie.fromNumber;
+    const from = talkie.contact?.name ?? formatPhoneNumber(talkie.fromNumber);
 
     return {
       id: talkie.id,

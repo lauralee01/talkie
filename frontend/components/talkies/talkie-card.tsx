@@ -5,7 +5,7 @@ import { AudioPlayer } from "@/components/talkies/audio-player";
 import { Card } from "@/components/ui/card";
 import { Modal } from "@/components/ui/modal";
 import { cn } from "@/lib/cn";
-import { formatTalkieDate } from "@/lib/format";
+import { formatPhoneNumber, formatTalkieDate } from "@/lib/format";
 import { isTalkieUnread, type Talkie } from "@/lib/talkies-api";
 
 type TalkieCardProps = {
@@ -89,7 +89,7 @@ export function TalkieCard({
                 unread ? "font-semibold" : "font-medium",
               )}
             >
-              {talkie.contact?.name ?? talkie.fromNumber}
+              {talkie.contact?.name ?? formatPhoneNumber(talkie.fromNumber)}
             </p>
           </div>
 

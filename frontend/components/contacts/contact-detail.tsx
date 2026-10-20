@@ -17,7 +17,7 @@ import {
   updateContact,
   type ContactDetail,
 } from "@/lib/contacts-api";
-import { pluralize } from "@/lib/format";
+import { formatPhoneNumber, pluralize } from "@/lib/format";
 import {
   deleteTalkie,
   markTalkieListened,
@@ -163,7 +163,7 @@ export function ContactDetailView({ contact }: ContactDetailViewProps) {
 
       <PageHeader
         title={name}
-        description={phoneNumber}
+        description={formatPhoneNumber(phoneNumber)}
         actions={
           <div className="flex shrink-0 items-center gap-3">
             <button

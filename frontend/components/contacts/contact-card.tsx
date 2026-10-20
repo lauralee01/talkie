@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Contact } from "@/lib/contacts-api";
 import { Card } from "@/components/ui/card";
-import { pluralize } from "@/lib/format";
+import { formatPhoneNumber, pluralize } from "@/lib/format";
 
 type ContactCardProps = {
   contact: Contact;
@@ -19,7 +19,9 @@ export function ContactCard({ contact }: ContactCardProps) {
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="font-medium text-foreground">{contact.name}</p>
-            <p className="mt-1 text-sm text-muted">{contact.phoneNumber}</p>
+            <p className="mt-1 text-sm text-muted">
+              {formatPhoneNumber(contact.phoneNumber)}
+            </p>
           </div>
 
           <p className="text-sm text-muted">
