@@ -4,6 +4,22 @@ import { useRef, useState } from "react";
 import { formatDuration } from "@/lib/format";
 import { getTalkieAudioUrl } from "@/lib/talkies-api";
 
+let activeAudio: HTMLAudioElement | null = null;
+
+function setActiveAudio(audio: HTMLAudioElement) {
+  if (activeAudio && activeAudio !== audio) {
+    activeAudio.pause();
+  }
+
+  activeAudio = audio;
+}
+
+function clearActiveAudio(audio: HTMLAudioElement) {
+  if (activeAudio === audio) {
+    activeAudio = null;
+  }
+}
+
 type AudioPlayerProps = {
   talkieId: string;
   durationSeconds?: number;
@@ -27,6 +43,7 @@ export function AudioPlayer({
     if (!audio) return;
 
     if (audio.paused) {
+      setActiveAudio(audio);
       await audio.play();
     } else {
       audio.pause();
@@ -47,6 +64,7 @@ export function AudioPlayer({
     setCurrentTime(0);
 
     if (audioRef.current) {
+      clearActiveAudio(audioRef.current);
       audioRef.current.currentTime = 0;
     }
   }
@@ -58,11 +76,15 @@ export function AudioPlayer({
         src={audioUrl}
         crossOrigin="use-credentials"
         preload="none"
-        onPlay={() => {
+        onPlay={(event) => {
+          setActiveAudio(event.currentTarget);
           setIsPlaying(true);
           onPlay?.();
         }}
-        onPause={() => setIsPlaying(false)}
+        onPause={(event) => {
+          clearActiveAudio(event.currentTarget);
+          setIsPlaying(false);
+        }}
         onEnded={handleEnded}
         onTimeUpdate={(event) => {
           setCurrentTime(event.currentTarget.currentTime);
