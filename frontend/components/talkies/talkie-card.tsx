@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { AudioPlayer } from "@/components/talkies/audio-player";
 import { Card } from "@/components/ui/card";
@@ -13,6 +14,7 @@ type TalkieCardProps = {
   onDelete: (talkieId: string) => Promise<void>;
   onListened: (talkieId: string) => Promise<void>;
   onMarkUnread: (talkieId: string) => Promise<void>;
+  linkToContact?: boolean;
 };
 
 export function TalkieCard({
@@ -20,12 +22,19 @@ export function TalkieCard({
   onDelete,
   onListened,
   onMarkUnread,
+  linkToContact = true,
 }: TalkieCardProps) {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isMarkingUnread, setIsMarkingUnread] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const unread = isTalkieUnread(talkie);
+  const fromLabel =
+    talkie.contact?.name ?? formatPhoneNumber(talkie.fromNumber);
+  const fromClassName = cn(
+    "mt-1 text-foreground",
+    unread ? "font-semibold" : "font-medium",
+  );
 
   function openConfirm() {
     setError(null);
@@ -83,14 +92,19 @@ export function TalkieCard({
               ) : null}
             </div>
 
-            <p
-              className={cn(
-                "mt-1 text-foreground",
-                unread ? "font-semibold" : "font-medium",
-              )}
-            >
-              {talkie.contact?.name ?? formatPhoneNumber(talkie.fromNumber)}
-            </p>
+            {linkToContact && talkie.contact ? (
+              <Link
+                href={`/contacts/${talkie.contact.id}`}
+                className={cn(
+                  fromClassName,
+                  "transition hover:underline focus-visible:outline-none focus-visible:underline",
+                )}
+              >
+                {fromLabel}
+              </Link>
+            ) : (
+              <p className={fromClassName}>{fromLabel}</p>
+            )}
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">

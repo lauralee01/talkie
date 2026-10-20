@@ -241,6 +241,7 @@ export function ContactDetailView({ contact }: ContactDetailViewProps) {
                 onDelete={removeTalkie}
                 onListened={markListened}
                 onMarkUnread={markUnread}
+                linkToContact={false}
               />
             ))}
           </div>
