@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 type PageHeaderProps = {
   title: string;
-  description?: string;
+  description?: ReactNode;
   actions?: ReactNode;
 };
 
@@ -16,9 +16,9 @@ export function PageHeader({ title, description, actions }: PageHeaderProps) {
           </h1>
 
           {description ? (
-            <p className="mt-3 max-w-lg text-base leading-7 text-muted">
+            <div className="mt-3 max-w-lg text-base leading-7 text-muted">
               {description}
-            </p>
+            </div>
           ) : null}
         </div>
 

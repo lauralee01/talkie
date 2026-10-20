@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { CopyablePhone } from "@/components/copyable-phone";
 import { AudioPlayer } from "@/components/talkies/audio-player";
 import { Card } from "@/components/ui/card";
 import { Modal } from "@/components/ui/modal";
 import { cn } from "@/lib/cn";
-import { formatPhoneNumber, formatTalkieDate } from "@/lib/format";
+import { formatTalkieDate } from "@/lib/format";
 import { isTalkieUnread, type Talkie } from "@/lib/talkies-api";
 
 type TalkieCardProps = {
@@ -29,8 +30,6 @@ export function TalkieCard({
   const [isMarkingUnread, setIsMarkingUnread] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const unread = isTalkieUnread(talkie);
-  const fromLabel =
-    talkie.contact?.name ?? formatPhoneNumber(talkie.fromNumber);
   const fromClassName = cn(
     "mt-1 text-foreground",
     unread ? "font-semibold" : "font-medium",
@@ -92,18 +91,25 @@ export function TalkieCard({
               ) : null}
             </div>
 
-            {linkToContact && talkie.contact ? (
-              <Link
-                href={`/contacts/${talkie.contact.id}`}
-                className={cn(
-                  fromClassName,
-                  "transition hover:underline focus-visible:outline-none focus-visible:underline",
-                )}
-              >
-                {fromLabel}
-              </Link>
+            {talkie.contact ? (
+              linkToContact ? (
+                <Link
+                  href={`/contacts/${talkie.contact.id}`}
+                  className={cn(
+                    fromClassName,
+                    "transition hover:underline focus-visible:outline-none focus-visible:underline",
+                  )}
+                >
+                  {talkie.contact.name}
+                </Link>
+              ) : (
+                <p className={fromClassName}>{talkie.contact.name}</p>
+              )
             ) : (
-              <p className={fromClassName}>{fromLabel}</p>
+              <CopyablePhone
+                value={talkie.fromNumber}
+                className={fromClassName}
+              />
             )}
           </div>
 

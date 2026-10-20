@@ -5,6 +5,7 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ContactFormFields } from "@/components/contacts/contact-form-fields";
 import { EmptyState } from "@/components/empty-state";
+import { CopyablePhone } from "@/components/copyable-phone";
 import { PageHeader } from "@/components/page-header";
 import { SectionHeader } from "@/components/section-header";
 import { TalkieCard } from "@/components/talkies/talkie-card";
@@ -17,7 +18,7 @@ import {
   updateContact,
   type ContactDetail,
 } from "@/lib/contacts-api";
-import { formatPhoneNumber, pluralize } from "@/lib/format";
+import { pluralize } from "@/lib/format";
 import {
   deleteTalkie,
   markTalkieListened,
@@ -163,7 +164,12 @@ export function ContactDetailView({ contact }: ContactDetailViewProps) {
 
       <PageHeader
         title={name}
-        description={formatPhoneNumber(phoneNumber)}
+        description={
+          <CopyablePhone
+            value={phoneNumber}
+            className="text-base leading-7 text-muted"
+          />
+        }
         actions={
           <div className="flex shrink-0 items-center gap-3">
             <button
