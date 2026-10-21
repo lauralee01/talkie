@@ -14,7 +14,8 @@ import {
   StreamableFile,
   UseGuards,
 } from '@nestjs/common';
-import { createReadStream, existsSync } from 'node:fs';
+import { createReadStream } from 'node:fs';
+import { stat } from 'node:fs/promises';
 import { Observable, map } from 'rxjs';
 import { AuthGuard } from '../auth/auth.guard';
 import { getAudioMimeType } from '../common/utils/audio-mime';
@@ -63,12 +64,20 @@ export class TalkiesController {
       throw new NotFoundException('Talkie not found');
     }
 
-    if (!existsSync(talkie.audioPath)) {
+    let fileSize: number;
+    try {
+      const fileStat = await stat(talkie.audioPath);
+      fileSize = fileStat.size;
+    } catch {
       throw new NotFoundException('Talkie audio file not found');
     }
 
+    const extension = talkie.fileFormat.replace(/^\./, '') || 'wav';
+
     return new StreamableFile(createReadStream(talkie.audioPath), {
       type: getAudioMimeType(talkie.fileFormat),
+      disposition: `inline; filename="talkie-${talkie.id}.${extension}"`,
+      length: fileSize,
     });
   }
 
