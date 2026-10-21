@@ -42,9 +42,9 @@ export class TalkiesController {
   events(): Observable<MessageEvent> {
     this.logger.debug('SSE client connected');
 
-    return this.talkiesEventsService.newTalkie$.pipe(
-      map(() => ({
-        data: { type: 'talkie.changed' },
+    return this.talkiesEventsService.live$.pipe(
+      map((event) => ({
+        data: event,
       })),
     );
   }
