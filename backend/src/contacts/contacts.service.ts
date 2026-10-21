@@ -57,7 +57,7 @@ export class ContactsService {
 
   findAll() {
     return this.prisma.contact.findMany({
-      orderBy: { createdAt: 'desc' },
+      orderBy: { name: 'asc' },
       include: {
         _count: {
           select: { talkies: true },
