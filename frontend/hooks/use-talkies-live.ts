@@ -260,9 +260,21 @@ export function useTalkiesLive({
     }
   }, []);
 
-  const handleMessage = useCallback(() => {
-    void refresh(true);
-  }, [refresh]);
+  const handleMessage = useCallback(
+    (event: MessageEvent) => {
+      try {
+        const payload = JSON.parse(event.data) as { type?: string };
+        if (payload.type !== "talkie.changed") {
+          return;
+        }
+      } catch {
+        return;
+      }
+
+      void refresh(true);
+    },
+    [refresh],
+  );
 
   const dismissToast = useCallback(() => {
     setToast(null);
