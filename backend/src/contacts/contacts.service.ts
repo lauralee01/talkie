@@ -7,6 +7,7 @@ import {
 import { normalizePhoneNumber } from '../common/utils/phone-number';
 import { isPrismaUniqueConstraintError } from '../common/utils/prisma-errors';
 import { PrismaService } from '../prisma/prisma.service';
+import { TalkiesEventsService } from '../talkies/talkies-events.service';
 
 type ContactInput = {
   name: string;
@@ -32,7 +33,10 @@ const contactTalkieSelect = {
 
 @Injectable()
 export class ContactsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly talkiesEventsService: TalkiesEventsService,
+  ) {}
 
   async create(input: ContactInput) {
     const phoneNumber = this.requirePhoneNumber(input.phoneNumber);
@@ -107,8 +111,8 @@ export class ContactsService {
     const phoneNumber = this.requirePhoneNumber(input.phoneNumber);
 
     try {
-      return await this.prisma.$transaction(async (prisma) => {
-        const contact = await prisma.contact.update({
+      const contact = await this.prisma.$transaction(async (prisma) => {
+        const updated = await prisma.contact.update({
           where: { id },
           data: {
             name: input.name.trim(),
@@ -117,11 +121,22 @@ export class ContactsService {
         });
 
         if (phoneNumber !== existing.phoneNumber) {
-          await this.linkTalkiesByPhone(prisma, contact.id, phoneNumber);
+          await this.unlinkTalkiesNotMatchingPhone(
+            prisma,
+            updated.id,
+            phoneNumber,
+          );
+          await this.linkTalkiesByPhone(prisma, updated.id, phoneNumber);
         }
 
-        return contact;
+        return updated;
       });
+
+      if (phoneNumber !== existing.phoneNumber) {
+        this.talkiesEventsService.notifyNewTalkie();
+      }
+
+      return contact;
     } catch (error) {
       this.rethrowUniqueConflict(error);
     }
@@ -149,6 +164,22 @@ export class ContactsService {
     }
 
     return phoneNumber;
+  }
+
+  private async unlinkTalkiesNotMatchingPhone(
+    prisma: Pick<PrismaService, 'talkie'>,
+    contactId: string,
+    phoneNumber: string,
+  ) {
+    await prisma.talkie.updateMany({
+      where: {
+        contactId,
+        NOT: { fromNumber: phoneNumber },
+      },
+      data: {
+        contactId: null,
+      },
+    });
   }
 
   private async linkTalkiesByPhone(
