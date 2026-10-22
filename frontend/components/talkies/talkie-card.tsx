@@ -1,13 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { CopyablePhone } from "@/components/copyable-phone";
 import { AudioPlayer } from "@/components/talkies/audio-player";
 import { Card } from "@/components/ui/card";
 import { Modal } from "@/components/ui/modal";
 import { cn } from "@/lib/cn";
-import { formatTalkieDate } from "@/lib/format";
+import {
+  formatDuration,
+  formatPhoneNumber,
+  formatTalkieDate,
+  getInitials,
+} from "@/lib/format";
 import { isTalkieUnread, type Talkie } from "@/lib/talkies-api";
 
 type TalkieCardProps = {
@@ -30,10 +35,7 @@ export function TalkieCard({
   const [isMarkingUnread, setIsMarkingUnread] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const unread = isTalkieUnread(talkie);
-  const fromClassName = cn(
-    "mt-1 text-foreground",
-    unread ? "font-semibold" : "font-medium",
-  );
+  const displayName = talkie.contact?.name ?? formatPhoneNumber(talkie.fromNumber);
 
   function openConfirm() {
     setError(null);
@@ -78,66 +80,65 @@ export function TalkieCard({
     <>
       <Card
         as="article"
-        className={cn(unread && "border-primary/15 ring-1 ring-primary/5")}
+        className={cn(
+          "transition hover:border-ring/30",
+          unread && "border-primary/25 ring-1 ring-primary/10",
+        )}
       >
-        <div className="mb-5 flex items-start justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <p className="text-sm text-muted">From</p>
-              {unread ? (
-                <span className="rounded-full bg-inverse px-2 py-0.5 text-[11px] font-medium tracking-wide text-inverse-foreground">
-                  New
-                </span>
-              ) : null}
-            </div>
+        <div className="mb-4 flex items-start gap-3 sm:mb-5 sm:gap-4">
+          <Avatar unread={unread}>{getInitials(displayName)}</Avatar>
 
-            {talkie.contact ? (
-              linkToContact ? (
-                <Link
-                  href={`/contacts/${talkie.contact.id}`}
-                  className={cn(
-                    fromClassName,
-                    "transition hover:underline focus-visible:outline-none focus-visible:underline",
-                  )}
+          <div className="min-w-0 flex-1">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <FromLabel
+                    talkie={talkie}
+                    unread={unread}
+                    linkToContact={linkToContact}
+                  />
+                  {unread ? (
+                    <span className="rounded-full bg-inverse px-2 py-0.5 text-[11px] font-medium tracking-wide text-inverse-foreground">
+                      New
+                    </span>
+                  ) : null}
+                </div>
+
+                <p className="mt-1 text-sm text-muted">
+                  <time dateTime={talkie.createdAt}>
+                    {formatTalkieDate(talkie.createdAt)}
+                  </time>
+                  <span className="text-subtle"> · </span>
+                  {formatDuration(talkie.durationSeconds)}
+                </p>
+              </div>
+
+              <div className="flex shrink-0 items-center gap-0.5">
+                {!unread ? (
+                  <button
+                    type="button"
+                    onClick={() => void handleMarkUnread()}
+                    disabled={isMarkingUnread}
+                    aria-label="Mark unread"
+                    title="Mark unread"
+                    className="cursor-pointer rounded-lg p-1.5 text-muted transition hover:bg-surface-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <UnreadIcon />
+                  </button>
+                ) : null}
+
+                <button
+                  type="button"
+                  onClick={openConfirm}
+                  disabled={isDeleting}
+                  aria-label="Delete Talkie"
+                  title="Delete"
+                  className="cursor-pointer rounded-lg p-1.5 text-muted transition hover:bg-danger-muted hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {talkie.contact.name}
-                </Link>
-              ) : (
-                <p className={fromClassName}>{talkie.contact.name}</p>
-              )
-            ) : (
-              <CopyablePhone
-                value={talkie.fromNumber}
-                className={fromClassName}
-              />
-            )}
-          </div>
-
-          <div className="flex items-center gap-2 sm:gap-3">
-            <time dateTime={talkie.createdAt} className="text-sm text-muted">
-              {formatTalkieDate(talkie.createdAt)}
-            </time>
-
-            {!unread ? (
-              <button
-                type="button"
-                onClick={() => void handleMarkUnread()}
-                disabled={isMarkingUnread}
-                className="cursor-pointer text-sm font-medium text-muted transition hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {isMarkingUnread ? "Updating..." : "Mark unread"}
-              </button>
-            ) : null}
-
-            <button
-              type="button"
-              onClick={openConfirm}
-              disabled={isDeleting}
-              aria-label="Delete Talkie"
-              className="cursor-pointer rounded-lg p-1.5 text-danger transition hover:bg-danger-muted hover:text-danger-hover disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <TrashIcon />
-            </button>
+                  <TrashIcon />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -188,6 +189,81 @@ export function TalkieCard({
         </div>
       </Modal>
     </>
+  );
+}
+
+function FromLabel({
+  talkie,
+  unread,
+  linkToContact,
+}: {
+  talkie: Talkie;
+  unread: boolean;
+  linkToContact: boolean;
+}) {
+  const className = cn(
+    "truncate text-base text-foreground",
+    unread ? "font-semibold" : "font-medium",
+  );
+
+  if (talkie.contact) {
+    if (linkToContact) {
+      return (
+        <Link
+          href={`/contacts/${talkie.contact.id}`}
+          className={cn(
+            className,
+            "transition hover:underline focus-visible:outline-none focus-visible:underline",
+          )}
+        >
+          {talkie.contact.name}
+        </Link>
+      );
+    }
+
+    return <p className={className}>{talkie.contact.name}</p>;
+  }
+
+  return (
+    <CopyablePhone value={talkie.fromNumber} className={className} />
+  );
+}
+
+function Avatar({
+  unread,
+  children,
+}: {
+  unread: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex size-11 shrink-0 items-center justify-center rounded-full text-sm font-semibold",
+        unread
+          ? "bg-primary text-primary-foreground"
+          : "bg-surface-muted text-muted",
+      )}
+      aria-hidden="true"
+    >
+      {children}
+    </div>
+  );
+}
+
+function UnreadIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className="size-4 fill-none stroke-current stroke-2"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M4 7.5h12.5a4 4 0 0 1 0 8H8M4 7.5 7 4.5M4 7.5 7 10.5"
+      />
+    </svg>
   );
 }
 

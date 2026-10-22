@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { cn } from "@/lib/cn";
 import { formatDuration } from "@/lib/format";
 import { getTalkieAudioUrl } from "@/lib/talkies-api";
 
@@ -37,6 +38,7 @@ export function AudioPlayer({
   const [duration, setDuration] = useState(durationSeconds);
 
   const audioUrl = getTalkieAudioUrl(talkieId);
+  const progress = duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0;
 
   async function togglePlayback() {
     const audio = audioRef.current;
@@ -70,7 +72,7 @@ export function AudioPlayer({
   }
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-3 rounded-2xl bg-surface-muted px-3 py-2.5 sm:gap-4 sm:px-4">
       <audio
         ref={audioRef}
         src={audioUrl}
@@ -90,7 +92,10 @@ export function AudioPlayer({
           setCurrentTime(event.currentTarget.currentTime);
         }}
         onLoadedMetadata={(event) => {
-          setDuration(event.currentTarget.duration);
+          const nextDuration = event.currentTarget.duration;
+          if (Number.isFinite(nextDuration) && nextDuration > 0) {
+            setDuration(nextDuration);
+          }
         }}
       />
 
@@ -98,7 +103,12 @@ export function AudioPlayer({
         type="button"
         onClick={togglePlayback}
         aria-label={isPlaying ? "Pause Talkie" : "Play Talkie"}
-        className="flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full bg-primary text-primary-foreground transition hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+        className={cn(
+          "flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full text-primary-foreground shadow-sm transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+          isPlaying
+            ? "bg-primary-hover"
+            : "bg-primary hover:bg-primary-hover",
+        )}
       >
         {isPlaying ? <PauseIcon /> : <PlayIcon />}
       </button>
@@ -115,7 +125,10 @@ export function AudioPlayer({
         value={currentTime}
         onChange={handleSeek}
         aria-label="Talkie playback position"
-        className="min-w-0 flex-1 cursor-pointer accent-primary"
+        style={{
+          background: `linear-gradient(to right, var(--primary) ${progress}%, var(--border) ${progress}%)`,
+        }}
+        className="h-1.5 min-w-0 flex-1 cursor-pointer appearance-none rounded-full outline-none [&::-moz-range-thumb]:size-3.5 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-primary [&::-webkit-slider-thumb]:size-3.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary"
       />
 
       <span className="w-9 text-xs tabular-nums text-muted">
