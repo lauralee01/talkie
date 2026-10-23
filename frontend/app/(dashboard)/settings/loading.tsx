@@ -7,7 +7,7 @@ export default function SettingsLoading() {
     <PageShell>
       <PageHeader
         title="Settings"
-        description="Customize what callers hear on your Talkie line."
+        description="The script and limits for every call to your Talkie line."
       />
       <LoadingState label="Loading settings…" rows={2} />
     </PageShell>

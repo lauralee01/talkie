@@ -14,7 +14,7 @@ export default function SettingsErrorPage({ reset }: ErrorPageProps) {
     <PageShell>
       <PageHeader
         title="Settings"
-        description="Customize what callers hear on your Talkie line."
+        description="The script and limits for every call to your Talkie line."
       />
       <ErrorState
         title="Something went wrong"
