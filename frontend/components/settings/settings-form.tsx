@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useLayoutEffect, useRef, useState } from "react";
 import { SectionHeader } from "@/components/section-header";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/cn";
@@ -251,8 +251,20 @@ function PromptField({
   onChange,
   last = false,
 }: PromptFieldProps) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const count = value.length;
   const nearLimit = count > 450;
+
+  useLayoutEffect(() => {
+    const textarea = textareaRef.current;
+
+    if (!textarea) {
+      return;
+    }
+
+    textarea.style.height = "auto";
+    textarea.style.height = `${textarea.scrollHeight}px`;
+  }, [value]);
 
   return (
     <div className={cn("p-5 sm:p-6", !last && "border-b border-border")}>
@@ -271,12 +283,13 @@ function PromptField({
           <p className="mt-0.5 text-sm text-muted">{description}</p>
           <textarea
             id={id}
+            ref={textareaRef}
             value={value}
             onChange={(event) => onChange(event.target.value)}
             required
-            rows={3}
+            rows={1}
             maxLength={PROMPT_MAX}
-            className="mt-3 w-full resize-y rounded-xl border border-border bg-surface-muted px-4 py-3 outline-none transition placeholder:text-subtle focus:border-ring focus:bg-surface"
+            className="mt-3 w-full resize-none overflow-hidden rounded-xl border border-border bg-surface-muted px-4 py-3 outline-none transition placeholder:text-subtle focus:border-ring focus:bg-surface"
           />
           <p
             className={cn(
