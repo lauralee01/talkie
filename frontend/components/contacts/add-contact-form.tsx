@@ -44,7 +44,9 @@ export function AddContactForm({ onSuccess }: AddContactFormProps) {
   }
 
   return (
-    <Card as="form" onSubmit={handleSubmit}>
+    <Card as="form" onSubmit={handleSubmit} className="border-ring/30">
+      <p className="mb-5 text-sm font-medium text-foreground">New contact</p>
+
       <ContactFormFields
         idPrefix="add-contact"
         name={name}
