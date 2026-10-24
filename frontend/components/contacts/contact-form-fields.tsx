@@ -10,6 +10,7 @@ type FieldProps = {
   required?: boolean;
 };
 
+// TODO: Add validation for the form fields and display errors to the user
 export function ContactFormFields({
   name,
   phoneNumber,
