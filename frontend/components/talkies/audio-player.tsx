@@ -74,7 +74,7 @@ export function AudioPlayer({
   return (
     <div
       className={cn(
-        "group flex items-center gap-3 rounded-2xl border border-transparent bg-surface-muted px-3 py-2.5 sm:gap-4 sm:px-4",
+        "group flex cursor-pointer items-center gap-3 rounded-2xl border border-transparent bg-surface-muted px-3 py-2.5 sm:gap-4 sm:px-4",
         "transition duration-200 hover:border-border hover:shadow-sm",
       )}
     >
