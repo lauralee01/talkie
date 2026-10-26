@@ -72,7 +72,12 @@ export function AudioPlayer({
   }
 
   return (
-    <div className="flex items-center gap-3 rounded-2xl bg-surface-muted px-3 py-2.5 sm:gap-4 sm:px-4">
+    <div
+      className={cn(
+        "group flex items-center gap-3 rounded-2xl border border-transparent bg-surface-muted px-3 py-2.5 sm:gap-4 sm:px-4",
+        "transition duration-200 hover:border-border hover:shadow-sm",
+      )}
+    >
       <audio
         ref={audioRef}
         src={audioUrl}
@@ -104,7 +109,7 @@ export function AudioPlayer({
         onClick={togglePlayback}
         aria-label={isPlaying ? "Pause Talkie" : "Play Talkie"}
         className={cn(
-          "flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full text-primary-foreground shadow-sm transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+          "flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full text-primary-foreground shadow-sm transition duration-200 group-hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
           isPlaying
             ? "bg-primary-hover"
             : "bg-primary hover:bg-primary-hover",
@@ -113,7 +118,7 @@ export function AudioPlayer({
         {isPlaying ? <PauseIcon /> : <PlayIcon />}
       </button>
 
-      <span className="w-9 text-right text-xs tabular-nums text-muted">
+      <span className="w-9 text-right text-xs tabular-nums text-muted transition group-hover:text-foreground">
         {formatDuration(currentTime)}
       </span>
 
@@ -128,10 +133,10 @@ export function AudioPlayer({
         style={{
           background: `linear-gradient(to right, var(--primary) ${progress}%, var(--border) ${progress}%)`,
         }}
-        className="h-1.5 min-w-0 flex-1 cursor-pointer appearance-none rounded-full outline-none [&::-moz-range-thumb]:size-3.5 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-primary [&::-webkit-slider-thumb]:size-3.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary"
+        className="h-1.5 min-w-0 flex-1 cursor-pointer appearance-none rounded-full outline-none transition group-hover:h-2 [&::-moz-range-thumb]:size-3.5 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-primary [&::-moz-range-thumb]:transition [&::-webkit-slider-thumb]:size-3.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:transition group-hover:[&::-moz-range-thumb]:size-4 group-hover:[&::-webkit-slider-thumb]:size-4"
       />
 
-      <span className="w-9 text-xs tabular-nums text-muted">
+      <span className="w-9 text-xs tabular-nums text-muted transition group-hover:text-foreground">
         {formatDuration(duration)}
       </span>
     </div>
