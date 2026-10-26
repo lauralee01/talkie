@@ -29,6 +29,7 @@ export type GetTalkiesOptions = {
 };
 
 export const DEFAULT_TALKIES_PAGE_SIZE = 20;
+export const MAX_TALKIES_PAGE_SIZE = 100;
 
 export function isTalkieUnread(talkie: Talkie): boolean {
   return talkie.listenedAt === null;

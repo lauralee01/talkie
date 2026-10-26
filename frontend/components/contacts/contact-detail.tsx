@@ -11,6 +11,8 @@ import { SectionHeader } from "@/components/section-header";
 import { TalkieCard } from "@/components/talkies/talkie-card";
 import { Card } from "@/components/ui/card";
 import { Modal } from "@/components/ui/modal";
+import { Pagination, getPageCount, slicePage } from "@/components/ui/pagination";
+import { useViewportPageSize } from "@/hooks/use-viewport-page-size";
 import { cn } from "@/lib/cn";
 import {
   deleteContact,
@@ -35,6 +37,7 @@ export function ContactDetailView({ contact }: ContactDetailViewProps) {
   const [name, setName] = useState(contact.name);
   const [phoneNumber, setPhoneNumber] = useState(contact.phoneNumber);
   const [talkies, setTalkies] = useState<Talkie[]>(contact.talkies);
+  const [page, setPage] = useState(1);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -151,6 +154,20 @@ export function ContactDetailView({ contact }: ContactDetailViewProps) {
     }
   }
 
+  const { listRef, pageSize } = useViewportPageSize({
+    itemCount: talkies.length,
+    gapPx: 16,
+    fallbackPageSize: talkies.length || 1,
+  });
+  const pageCount = getPageCount(talkies.length, pageSize);
+  const currentPage = Math.min(page, Math.max(1, pageCount));
+
+  if (currentPage !== page) {
+    setPage(currentPage);
+  }
+
+  const visibleTalkies = slicePage(talkies, currentPage, pageSize);
+
   return (
     <>
       <div className="mb-8">
@@ -239,18 +256,29 @@ export function ContactDetailView({ contact }: ContactDetailViewProps) {
         {talkies.length === 0 ? (
           <EmptyState>No Talkies from this contact yet.</EmptyState>
         ) : (
-          <div className="flex flex-col gap-4">
-            {talkies.map((talkie) => (
-              <TalkieCard
-                key={talkie.id}
-                talkie={talkie}
-                onDelete={removeTalkie}
-                onListened={markListened}
-                onMarkUnread={markUnread}
-                linkToContact={false}
-              />
-            ))}
-          </div>
+          <>
+            <div ref={listRef} className="flex flex-col gap-4">
+              {visibleTalkies.map((talkie) => (
+                <TalkieCard
+                  key={talkie.id}
+                  talkie={talkie}
+                  onDelete={removeTalkie}
+                  onListened={markListened}
+                  onMarkUnread={markUnread}
+                  linkToContact={false}
+                />
+              ))}
+            </div>
+
+            <Pagination
+              className="mt-6"
+              page={currentPage}
+              pageSize={pageSize}
+              total={talkies.length}
+              itemLabel="Talkie"
+              onPageChange={setPage}
+            />
+          </>
         )}
       </section>
 

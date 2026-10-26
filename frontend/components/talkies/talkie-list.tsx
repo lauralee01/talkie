@@ -8,8 +8,14 @@ import { LoadingState } from "@/components/loading-state";
 import { SectionHeader } from "@/components/section-header";
 import { TalkieCard } from "@/components/talkies/talkie-card";
 import { TalkiesFilterBar } from "@/components/talkies/talkies-filter-bar";
+import {
+  Pagination,
+  getPageCount,
+  slicePage,
+} from "@/components/ui/pagination";
 import { Toast } from "@/components/ui/toast";
 import { useTalkiesLive } from "@/hooks/use-talkies-live";
+import { useViewportPageSize } from "@/hooks/use-viewport-page-size";
 import {
   DEFAULT_TALKIE_FILTERS,
   filterTalkies,
@@ -19,6 +25,7 @@ import {
 } from "@/lib/filter-talkies";
 import { pluralize } from "@/lib/format";
 import {
+  MAX_TALKIES_PAGE_SIZE,
   getTalkies,
   isTalkieUnread,
   type TalkiesPage,
@@ -32,7 +39,7 @@ type TalkieListProps = {
 const EMPTY_PAGE: TalkiesPage = {
   items: [],
   page: 1,
-  pageSize: 20,
+  pageSize: MAX_TALKIES_PAGE_SIZE,
   total: 0,
   hasMore: false,
 };
@@ -45,19 +52,17 @@ export function TalkieList({
   const [bootstrapPage, setBootstrapPage] = useState(initialPage);
   const [isRetrying, setIsRetrying] = useState(false);
   const [filters, setFilters] = useState<TalkieFilters>(DEFAULT_TALKIE_FILTERS);
+  const [page, setPage] = useState(1);
   const deferredFilters = useDeferredValue(filters);
 
   const {
     talkies,
     total,
-    hasMore,
-    isLoadingMore,
     isMarkingAllListened,
     liveStatus,
     refreshError,
     toast,
     dismissToast,
-    loadMore,
     removeTalkie,
     markListened,
     markAllListened,
@@ -75,12 +80,28 @@ export function TalkieList({
     [talkies, deferredFilters],
   );
 
+  const { listRef, pageSize } = useViewportPageSize({
+    itemCount: filteredTalkies.length,
+    gapPx: 16,
+    fallbackPageSize: filteredTalkies.length || 1,
+  });
+
+  const pageCount = getPageCount(filteredTalkies.length, pageSize);
+  const currentPage = Math.min(page, Math.max(1, pageCount));
+
+  if (currentPage !== page) {
+    setPage(currentPage);
+  }
+
+  const visibleTalkies = slicePage(filteredTalkies, currentPage, pageSize);
+
   async function retryInitialLoad() {
     setIsRetrying(true);
     try {
-      const latest = await getTalkies();
+      const latest = await getTalkies({ page: 1, pageSize: MAX_TALKIES_PAGE_SIZE });
       setBootstrapPage(latest);
       setBootstrapError(null);
+      setPage(1);
     } catch {
       setBootstrapError(
         "Couldn't load Talkies. Check that the API is running, then try again.",
@@ -141,7 +162,10 @@ export function TalkieList({
         <TalkiesFilterBar
           filters={filters}
           contactOptions={contactOptions}
-          onChange={setFilters}
+          onChange={(next) => {
+            setFilters(next);
+            setPage(1);
+          }}
         />
       ) : null}
 
@@ -164,31 +188,29 @@ export function TalkieList({
           No Talkies match your filters. Try a different search or clear filters.
         </EmptyState>
       ) : (
-        <div className="flex flex-col gap-4">
-          {filteredTalkies.map((talkie) => (
-            <TalkieCard
-              key={talkie.id}
-              talkie={talkie}
-              onDelete={removeTalkie}
-              onListened={markListened}
-              onMarkUnread={markUnread}
-            />
-          ))}
-        </div>
-      )}
+        <>
+          <div ref={listRef} className="flex flex-col gap-4">
+            {visibleTalkies.map((talkie) => (
+              <TalkieCard
+                key={talkie.id}
+                talkie={talkie}
+                onDelete={removeTalkie}
+                onListened={markListened}
+                onMarkUnread={markUnread}
+              />
+            ))}
+          </div>
 
-      {hasMore && !filtersActive ? (
-        <div className="mt-6 flex justify-center">
-          <button
-            type="button"
-            onClick={() => void loadMore()}
-            disabled={isLoadingMore}
-            className="cursor-pointer rounded-xl border border-border bg-surface px-5 py-3 text-sm font-medium text-foreground transition hover:border-ring disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {isLoadingMore ? "Loading…" : "Load more"}
-          </button>
-        </div>
-      ) : null}
+          <Pagination
+            className="mt-6"
+            page={currentPage}
+            pageSize={pageSize}
+            total={filteredTalkies.length}
+            itemLabel="Talkie"
+            onPageChange={setPage}
+          />
+        </>
+      )}
 
       <Toast toast={toast} onDismiss={dismissToast} />
     </section>

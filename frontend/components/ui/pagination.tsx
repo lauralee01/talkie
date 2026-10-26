@@ -17,11 +17,20 @@ export type PaginationProps = {
 };
 
 export function getPageCount(total: number, pageSize: number): number {
-  if (total <= 0 || pageSize <= 0) {
-    return 0;
+  if (total <= 0 || pageSize <= 0 || !Number.isFinite(pageSize)) {
+    return total > 0 ? 1 : 0;
   }
 
   return Math.ceil(total / pageSize);
+}
+
+export function slicePage<T>(items: T[], page: number, pageSize: number): T[] {
+  if (pageSize <= 0 || !Number.isFinite(pageSize)) {
+    return items;
+  }
+
+  const start = (Math.max(1, page) - 1) * pageSize;
+  return items.slice(start, start + pageSize);
 }
 
 export function getPageRange(
@@ -29,7 +38,7 @@ export function getPageRange(
   pageSize: number,
   total: number,
 ): { start: number; end: number } {
-  if (total <= 0 || pageSize <= 0) {
+  if (total <= 0 || pageSize <= 0 || !Number.isFinite(pageSize)) {
     return { start: 0, end: 0 };
   }
 

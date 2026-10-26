@@ -6,7 +6,7 @@ import type { ToastMessage } from "@/components/ui/toast";
 import { useEventSource } from "@/hooks/use-event-source";
 import { formatPhoneNumber } from "@/lib/format";
 import {
-  DEFAULT_TALKIES_PAGE_SIZE,
+  MAX_TALKIES_PAGE_SIZE,
   deleteTalkie,
   getTalkies,
   getTalkiesEventsUrl,
@@ -20,14 +20,11 @@ import {
 type UseTalkiesLiveResult = {
   talkies: Talkie[];
   total: number;
-  hasMore: boolean;
-  isLoadingMore: boolean;
   isMarkingAllListened: boolean;
   liveStatus: LiveConnectionStatus;
   refreshError: string | null;
   toast: ToastMessage | null;
   dismissToast: () => void;
-  loadMore: () => Promise<void>;
   removeTalkie: (talkieId: string) => Promise<void>;
   markListened: (talkieId: string) => Promise<void>;
   markAllListened: () => Promise<void>;
@@ -62,108 +59,59 @@ function buildNewTalkieToast(newcomers: Talkie[]): ToastMessage | null {
   };
 }
 
-function mergeById(existing: Talkie[], incoming: Talkie[]): Talkie[] {
-  const seen = new Set(existing.map((talkie) => talkie.id));
-  const additions = incoming.filter((talkie) => !seen.has(talkie.id));
-  return [...existing, ...additions];
-}
-
 export function useTalkiesLive({
   initialPage,
 }: UseTalkiesLiveOptions): UseTalkiesLiveResult {
   const [talkies, setTalkies] = useState(initialPage.items);
-  const [page, setPage] = useState(initialPage.page);
   const [total, setTotal] = useState(initialPage.total);
-  const [hasMore, setHasMore] = useState(initialPage.hasMore);
-  const [pageSize] = useState(initialPage.pageSize || DEFAULT_TALKIES_PAGE_SIZE);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isMarkingAllListened, setIsMarkingAllListened] = useState(false);
   const [prevInitialPage, setPrevInitialPage] = useState(initialPage);
   const [refreshError, setRefreshError] = useState<string | null>(null);
   const [toast, setToast] = useState<ToastMessage | null>(null);
   const talkiesRef = useRef(talkies);
-  const pageRef = useRef(page);
 
   useEffect(() => {
     talkiesRef.current = talkies;
   }, [talkies]);
 
-  useEffect(() => {
-    pageRef.current = page;
-  }, [page]);
-
   if (initialPage !== prevInitialPage) {
     setPrevInitialPage(initialPage);
     setTalkies(initialPage.items);
-    setPage(initialPage.page);
     setTotal(initialPage.total);
-    setHasMore(initialPage.hasMore);
     setRefreshError(null);
   }
 
-  const refresh = useCallback(
-    async (announceNew = false) => {
-      try {
-        // One request covering what's already loaded (capped at API max).
-        const refreshSize = Math.min(
-          100,
-          Math.max(pageSize, talkiesRef.current.length),
-        );
-        const result = await getTalkies({ page: 1, pageSize: refreshSize });
-        const latest = result.items;
-
-        if (announceNew) {
-          const existingIds = new Set(
-            talkiesRef.current.map((talkie) => talkie.id),
-          );
-          const newcomers = latest.filter(
-            (talkie) => !existingIds.has(talkie.id),
-          );
-          const nextToast = buildNewTalkieToast(newcomers);
-
-          if (nextToast) {
-            setToast(nextToast);
-          }
-        }
-
-        setTalkies(latest);
-        setPage(Math.max(1, Math.ceil(latest.length / pageSize)));
-        setTotal(result.total);
-        setHasMore(result.hasMore);
-        setRefreshError(null);
-      } catch (error) {
-        console.error("Failed to refresh Talkies:", error);
-        setRefreshError(
-          "Couldn't refresh Talkies. Showing the last loaded list.",
-        );
-      }
-    },
-    [pageSize],
-  );
-
-  const loadMore = useCallback(async () => {
-    if (isLoadingMore || !hasMore) {
-      return;
-    }
-
-    setIsLoadingMore(true);
-
+  const refresh = useCallback(async (announceNew = false) => {
     try {
-      const nextPage = pageRef.current + 1;
-      const result = await getTalkies({ page: nextPage, pageSize });
+      const result = await getTalkies({
+        page: 1,
+        pageSize: MAX_TALKIES_PAGE_SIZE,
+      });
+      const latest = result.items;
 
-      setTalkies((current) => mergeById(current, result.items));
-      setPage(result.page);
+      if (announceNew) {
+        const existingIds = new Set(
+          talkiesRef.current.map((talkie) => talkie.id),
+        );
+        const nextToast = buildNewTalkieToast(
+          latest.filter((talkie) => !existingIds.has(talkie.id)),
+        );
+
+        if (nextToast) {
+          setToast(nextToast);
+        }
+      }
+
+      setTalkies(latest);
       setTotal(result.total);
-      setHasMore(result.hasMore);
       setRefreshError(null);
     } catch (error) {
-      console.error("Failed to load more Talkies:", error);
-      setRefreshError("Couldn't load more Talkies. Please try again.");
-    } finally {
-      setIsLoadingMore(false);
+      console.error("Failed to refresh Talkies:", error);
+      setRefreshError(
+        "Couldn't refresh Talkies. Showing the last loaded list.",
+      );
     }
-  }, [hasMore, isLoadingMore, pageSize]);
+  }, []);
 
   const removeTalkie = useCallback(async (talkieId: string) => {
     let previous: Talkie[] = [];
@@ -287,14 +235,11 @@ export function useTalkiesLive({
   return {
     talkies,
     total,
-    hasMore,
-    isLoadingMore,
     isMarkingAllListened,
     liveStatus,
     refreshError,
     toast,
     dismissToast,
-    loadMore,
     removeTalkie,
     markListened,
     markAllListened,

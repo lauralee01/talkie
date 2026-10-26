@@ -2,13 +2,13 @@ import { PageHeader } from "@/components/page-header";
 import { PageShell } from "@/components/page-shell";
 import { TalkieList } from "@/components/talkies/talkie-list";
 import { loadResult } from "@/lib/load-result";
-import { getTalkies } from "@/lib/talkies-api";
+import { MAX_TALKIES_PAGE_SIZE, getTalkies } from "@/lib/talkies-api";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const result = await loadResult(
-    getTalkies,
+    () => getTalkies({ page: 1, pageSize: MAX_TALKIES_PAGE_SIZE }),
     "Couldn't load Talkies. Check that the API is running, then try again.",
   );
 
