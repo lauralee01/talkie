@@ -4,7 +4,7 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ContactFormFields } from "@/components/contacts/contact-form-fields";
-import { EmptyState } from "@/components/empty-state";
+import { EmptyState, MicIcon } from "@/components/empty-state";
 import { CopyablePhone } from "@/components/copyable-phone";
 import { SectionHeader } from "@/components/section-header";
 import { TalkieCard } from "@/components/talkies/talkie-card";
@@ -265,7 +265,11 @@ export function ContactDetailView({ contact }: ContactDetailViewProps) {
         />
 
         {talkies.length === 0 ? (
-          <EmptyState>No Talkies from this contact yet.</EmptyState>
+          <EmptyState
+            title="No Talkies yet"
+            description="When this person calls, their messages will show up here."
+            icon={<MicIcon />}
+          />
         ) : (
           <>
             <div ref={listRef} className="flex flex-col gap-4">

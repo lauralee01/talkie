@@ -1,7 +1,7 @@
 "use client";
 
 import { useDeferredValue, useMemo, useState } from "react";
-import { EmptyState } from "@/components/empty-state";
+import { EmptyState, MicIcon, SearchIcon } from "@/components/empty-state";
 import { ErrorState } from "@/components/error-state";
 import { LiveStatus } from "@/components/live-status";
 import { LoadingState } from "@/components/loading-state";
@@ -180,13 +180,17 @@ export function TalkieList({
       ) : null}
 
       {talkies.length === 0 ? (
-        <EmptyState>
-          No Talkies yet. Call your Talkie number to leave your first message.
-        </EmptyState>
+        <EmptyState
+          title="No Talkies yet"
+          description="Call your Talkie number to leave your first message."
+          icon={<MicIcon />}
+        />
       ) : filteredTalkies.length === 0 ? (
-        <EmptyState>
-          No Talkies match your filters. Try a different search or clear filters.
-        </EmptyState>
+        <EmptyState
+          title="No matching Talkies"
+          description="Try a different search or clear filters."
+          icon={<SearchIcon />}
+        />
       ) : (
         <>
           <div ref={listRef} className="flex flex-col gap-4">
