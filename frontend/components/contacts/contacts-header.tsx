@@ -30,7 +30,7 @@ export function ContactsHeader() {
       />
 
       {isAddingContact ? (
-        <div className="-mt-4 mb-10 sm:-mt-6 sm:mb-12">
+        <div className="-mt-2 mb-8 sm:-mt-4">
           <AddContactForm onSuccess={() => setIsAddingContact(false)} />
         </div>
       ) : null}
