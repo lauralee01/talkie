@@ -22,7 +22,10 @@ export function Navigation() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex items-center gap-6" aria-label="Primary">
+    <nav
+      className="flex min-w-0 flex-1 items-center justify-end gap-3 sm:gap-6"
+      aria-label="Primary"
+    >
       {NAV_ITEMS.map((item) => {
         const isActive = item.match(pathname);
 
@@ -32,7 +35,7 @@ export function Navigation() {
             href={item.href}
             aria-current={isActive ? "page" : undefined}
             className={cn(
-              "text-sm transition",
+              "shrink-0 whitespace-nowrap text-sm transition",
               isActive
                 ? "font-medium text-foreground"
                 : "text-muted hover:text-foreground",
