@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { ContactFormFields } from "@/components/contacts/contact-form-fields";
 import { EmptyState } from "@/components/empty-state";
 import { CopyablePhone } from "@/components/copyable-phone";
-import { PageHeader } from "@/components/page-header";
 import { SectionHeader } from "@/components/section-header";
 import { TalkieCard } from "@/components/talkies/talkie-card";
 import { Card } from "@/components/ui/card";
@@ -20,7 +19,7 @@ import {
   updateContact,
   type ContactDetail,
 } from "@/lib/contacts-api";
-import { pluralize } from "@/lib/format";
+import { getInitials, pluralize } from "@/lib/format";
 import {
   deleteTalkie,
   markTalkieListened,
@@ -170,61 +169,73 @@ export function ContactDetailView({ contact }: ContactDetailViewProps) {
 
   return (
     <>
-      <div className="mb-8">
-        <Link
-          href="/contacts"
-          className="text-sm text-muted transition hover:text-foreground"
-        >
-          ← Back to contacts
-        </Link>
-      </div>
+      <Link
+        href="/contacts"
+        className="mb-8 inline-block text-sm text-muted transition hover:text-foreground"
+      >
+        ← Contacts
+      </Link>
 
-      <PageHeader
-        title={name}
-        description={
+      <header className="mb-10 flex items-start gap-4 sm:mb-12 sm:gap-5">
+        <div
+          className="flex size-14 shrink-0 items-center justify-center rounded-full bg-surface-muted text-lg font-semibold text-muted sm:size-16 sm:text-xl"
+          aria-hidden="true"
+        >
+          {getInitials(name)}
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <h1 className="truncate text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+            {name}
+          </h1>
           <CopyablePhone
             value={phoneNumber}
-            className="text-base leading-7 text-muted"
+            className="mt-1 block text-sm text-muted"
           />
-        }
-        actions={
-          <div className="flex shrink-0 items-center gap-3">
-            <button
-              type="button"
-              onClick={() => {
-                if (isEditing) {
-                  cancelEditing();
-                } else {
-                  setIsEditing(true);
-                }
-              }}
-              className={cn(
-                "cursor-pointer text-sm font-medium transition",
-                isEditing
-                  ? "text-muted hover:text-foreground"
-                  : "rounded-xl bg-primary px-4 py-2.5 text-primary-foreground hover:bg-primary-hover",
-              )}
-            >
-              {isEditing ? "Cancel" : "Edit"}
-            </button>
+          {talkies.length > 0 ? (
+            <p className="mt-2 inline-flex rounded-full bg-surface-muted px-2.5 py-1 text-xs font-medium text-muted">
+              {pluralize(talkies.length, "Talkie")}
+            </p>
+          ) : null}
+        </div>
 
-            <button
-              type="button"
-              onClick={() => {
-                setDeleteError(null);
-                setIsDeleteOpen(true);
-              }}
-              aria-label="Delete contact"
-              className="cursor-pointer rounded-lg p-2 text-danger transition hover:bg-danger-muted hover:text-danger-hover"
-            >
-              <TrashIcon />
-            </button>
-          </div>
-        }
-      />
+        <div className="flex shrink-0 items-center gap-1">
+          <button
+            type="button"
+            onClick={() => {
+              if (isEditing) {
+                cancelEditing();
+              } else {
+                setIsEditing(true);
+              }
+            }}
+            className={cn(
+              "cursor-pointer rounded-xl px-3 py-2 text-sm font-medium transition",
+              isEditing
+                ? "text-muted hover:text-foreground"
+                : "text-muted hover:bg-surface-muted hover:text-foreground",
+            )}
+          >
+            {isEditing ? "Cancel" : "Edit"}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setDeleteError(null);
+              setIsDeleteOpen(true);
+            }}
+            aria-label="Delete contact"
+            className="cursor-pointer rounded-lg p-2 text-danger transition hover:bg-danger-muted hover:text-danger-hover"
+          >
+            <TrashIcon />
+          </button>
+        </div>
+      </header>
 
       {isEditing ? (
-        <Card as="form" onSubmit={handleSave} className="mb-10 sm:mb-12">
+        <Card as="form" onSubmit={handleSave} className="mb-10 border-ring/30 sm:mb-12">
+          <p className="mb-5 text-sm font-medium text-foreground">Edit contact</p>
           <ContactFormFields
             idPrefix="edit-contact"
             name={name}
