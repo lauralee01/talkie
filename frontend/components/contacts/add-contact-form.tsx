@@ -13,7 +13,6 @@ type AddContactFormProps = {
   onSuccess: () => void;
 };
 
-// TODO: Add validation for the form fields and display errors to the user
 
 export function AddContactForm({ onSuccess }: AddContactFormProps) {
   const router = useRouter();
