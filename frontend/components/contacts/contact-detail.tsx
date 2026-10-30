@@ -31,6 +31,13 @@ type ContactDetailViewProps = {
   contact: ContactDetail;
 };
 
+/**
+ * ContactDetailView is the view for the contact detail page.
+ * It displays the contact details and allows the user to edit the contact.
+ * It also displays the talkies for the contact.
+ * @param contact - The contact to display.
+ * @returns The ContactDetailView component.
+ */
 export function ContactDetailView({ contact }: ContactDetailViewProps) {
   const router = useRouter();
   const [name, setName] = useState(contact.name);
