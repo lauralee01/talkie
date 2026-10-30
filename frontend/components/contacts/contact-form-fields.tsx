@@ -10,6 +10,17 @@ type FieldProps = {
   required?: boolean;
 };
 
+/**
+ * ContactFormFields is the form fields for the contact form.
+ * It displays the name and phone number fields.
+ * @param name - The name of the contact.
+ * @param phoneNumber - The phone number of the contact.
+ * @param onNameChange - The function to call when the name changes.
+ * @param onPhoneNumberChange - The function to call when the phone number changes.
+ * @param idPrefix - The prefix for the id of the fields.
+ * @returns The ContactFormFields component.
+ */
+
 export function ContactFormFields({
   name,
   phoneNumber,
